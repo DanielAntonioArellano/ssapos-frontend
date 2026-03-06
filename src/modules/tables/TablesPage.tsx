@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./tables.module.css";
-import CheckoutModal from "../pos/CheckoutModal";
+import CheckoutModal from "../pos/CheckOutModal";
 
 type Order = {
   id: number;
