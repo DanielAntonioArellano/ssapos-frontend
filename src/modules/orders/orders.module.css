@@ -1,0 +1,193 @@
+.container {
+  padding: 24px;
+  background: #f3f4f6;
+  height: 100%;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Layout principal */
+.content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* ================= FILTERS ================= */
+
+.filters {
+  width: 260px;
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.filters h3 {
+  margin-bottom: 14px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.filters input {
+  width: 80%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  font-size: 14px;
+}
+
+.filters input:focus {
+  border-color: #0f766e;
+}
+
+/* ================= BOARD ================= */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ================= COLUMN ================= */
+
+.column {
+  background: #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.columnHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.columnHeader span {
+  background: #d1d5db;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+/* Sin scroll — las cards se expanden naturalmente */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ================= CARD ================= */
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.cardHeader {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cardBody {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+/* ================= ACTIONS ================= */
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cardActions button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.primaryBtn {
+  background: #0f766e;
+  color: white;
+}
+
+.primaryBtn:hover {
+  background: #115e59;
+}
+
+.secondaryBtn {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.secondaryBtn:hover {
+  background: #a7f3d0;
+}
+
+.dangerBtn {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.dangerBtn:hover {
+  background: #fecaca;
+}
+
+.editBtn {
+  background: #1d4ed8;
+  color: white;
+}
+
+.editBtn:hover {
+  background: #1e40af;
+} 
+.clearBtn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 7px 0;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: background 0.2s;
+}
+
+.clearBtn:hover {
+  background: #f3f4f6;
+}
+
+.filterResult {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}

@@ -1,0 +1,327 @@
+.wrapper {
+  display: flex;
+  height: 100vh;
+  background: #F3F5F6;
+}
+
+.sidebar {
+  width: 240px;
+  background: #0F4C4C;
+  color: white;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 72px;
+  background: white;
+  margin: 20px;
+  border-radius: 16px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.content {
+  flex: 1;
+  padding: 0 20px 20px 20px;
+  overflow-y: auto;
+}
+.logoBlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.logoCircle {
+  width: 42px;
+  height: 42px;
+  background: #136F6F;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.logoBlock h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.logoBlock span {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.navTitle {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.navItem {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+.footer {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.logoutBtn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  background: white;
+  color: #0F4C4C;
+  font-weight: 500;
+  cursor: pointer;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
+}
+
+.navItem span {
+  flex: 1;
+}
+ /* ── Topbar internals ─────────────────────────── */
+.topbarLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topbarTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.topbarSub {
+  font-size: 12px;
+  color: #9CA3AF;
+}
+
+.topbarRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbarBadge {
+  font-size: 13px;
+  color: #6B7280;
+  background: #F3F5F6;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+/* Estado caja */
+.cajaOpen,
+.cajaClosed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.cajaOpen {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.cajaClosed {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.cajaDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Botón cerrar caja */
+.cerrarCajaBtn {
+  padding: 7px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #FECACA;
+  background: white;
+  color: #DC2626;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cerrarCajaBtn:hover {
+  background: #FEF2F2;
+  border-color: #DC2626;
+}
+
+/* Avatar */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0F4C4C;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+/* ── Hamburguesa ──────────────────────────── */
+.menuBtn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.menuBtn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #111827;
+  border-radius: 2px;
+  transition: 0.2s;
+}
+
+.menuBtn:hover {
+  background: #f3f4f6;
+}
+
+/* ── Overlay ──────────────────────────────── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+}
+
+/* ── Botón X dentro del sidebar ───────────── */
+.sidebarCloseBtn {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  line-height: 0;
+}
+
+/* ── Responsive ───────────────────────────── */
+@media (max-width: 768px) {
+
+  .menuBtn {
+    display: flex;
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .sidebarCloseBtn {
+    display: flex;
+  }
+
+  .sidebar {
+    position: relative; /* sobreescribe el default de desktop */
+  }
+}

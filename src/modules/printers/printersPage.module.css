@@ -1,0 +1,436 @@
+/* src/modules/printers/PrintersPage.module.css */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Header ─────────────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #6B7280;
+}
+
+/* ── Botón agregar ───────────────────────────── */
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  background: #0F4C4C;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.addBtn:hover {
+  background: #0f766e;
+}
+
+/* ── Grid de cards ───────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ── Card ────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.cardInactive {
+  opacity: 0.6;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roleBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.toggleBtn:hover {
+  background: #F3F4F6;
+}
+
+/* ── Card body ───────────────────────────────── */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.printerName {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.printerIp {
+  margin: 0;
+  font-size: 13px;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: monospace;
+}
+
+.ipLabel {
+  font-size: 10px;
+  font-weight: 700;
+  background: #F3F4F6;
+  color: #374151;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: sans-serif;
+}
+
+.statusActive {
+  font-size: 12px;
+  color: #059669;
+  font-weight: 500;
+}
+
+.statusInactive {
+  font-size: 12px;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+/* ── Card actions ────────────────────────────── */
+.cardActions {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.testBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background: white;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f766e;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.testBtn:hover:not(:disabled) {
+  background: #ECFDF5;
+  border-color: #0f766e;
+}
+
+.testBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.editBtn,
+.deleteBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editBtn:hover {
+  background: #F3F4F6;
+}
+
+.deleteBtn:hover {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  color: #DC2626;
+}
+
+/* ── Estados vacíos ──────────────────────────── */
+.empty {
+  color: #9CA3AF;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: #9CA3AF;
+  font-size: 14px;
+}
+
+/* ── Modal overlay ───────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.96); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ── Form fields ─────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.field input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input:focus {
+  border-color: #0f766e;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 12px;
+}
+
+.fieldSmall input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fieldSmall label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ── Role selector ───────────────────────────── */
+.roleSelector {
+  display: flex;
+  gap: 8px;
+}
+
+.roleBtn {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 10px;
+  border: 1.5px solid #E5E7EB;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.roleBtn:hover {
+  background: #F3F4F6;
+}
+
+.roleBtnActive {
+  font-weight: 700;
+}
+
+/* ── Checkbox ────────────────────────────────── */
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.checkLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #0f766e;
+}
+
+/* ── Modal actions ───────────────────────────── */
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.cancelBtn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #F3F4F6;
+}
+
+.saveBtn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  background: #0F4C4C;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #0f766e;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .addBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    margin: 16px;
+    padding: 20px;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}

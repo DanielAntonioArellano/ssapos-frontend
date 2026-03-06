@@ -1,0 +1,218 @@
+/* =========================================
+   LAYOUT GENERAL
+========================================= */
+
+.container {
+  display: flex;
+  gap: 28px;
+  padding: 28px;
+  background: #f4f6f8;
+  min-height: calc(100vh - 70px);
+}
+
+.wrapper {
+  display: flex;
+  gap: 28px;
+  width: 100%;
+}
+
+/* =========================================
+   SIDEBAR / FILTERS
+========================================= */
+
+.sidebar {
+  width: 300px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #1f2937;
+}
+
+.card input {
+  width: 90%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.card input:focus {
+  border-color: #0f4f4f;
+  background: white;
+}
+
+/* =========================================
+   TAGS
+========================================= */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.tag,
+.tagActive {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.tag {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tag:hover {
+  background: #e5e7eb;
+}
+
+.tagActive {
+  background: #0f4f4f;
+  color: white;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.primaryBtn {
+  width: 100%;
+  background: #0f4f4f;
+  color: white;
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+  cursor: pointer;
+
+
+}
+
+.primaryBtn:hover {
+  background: #0c3e3e;
+}
+
+.secondaryBtn {
+  width: 100%;
+  background: #f3f4f6;
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+  cursor: pointer;
+  margin-top: 11px;
+}
+
+.secondaryBtn:hover {
+  background: #e5e7eb;
+}
+
+.lightBtn {
+  background: #eef3f3;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.lightBtn:hover {
+  background: #dde7e7;
+}
+
+/* =========================================
+   TABLE SECTION
+========================================= */
+
+.tableSection {
+  flex: 1;
+}
+
+.tableCard {
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* =========================================
+   TABLE
+========================================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  padding-bottom: 12px;
+}
+
+td {
+  padding: 14px 0;
+  border-top: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+/* =========================================
+   BADGES / STATUS
+========================================= */
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.in {
+  background: #e6f7ef;
+  color: #1b8c4c;
+}
+
+.low {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.out {
+  background: #fdecea;
+  color: #c62828;
+}

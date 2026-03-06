@@ -1,0 +1,359 @@
+/* ===================================================
+   users.module.css
+   =================================================== */
+
+.container {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+/* ---------------------------------------------------
+   Header
+   --------------------------------------------------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0;
+}
+
+/* ---------------------------------------------------
+   Search
+   --------------------------------------------------- */
+.searchBar {
+  margin-bottom: 1.5rem;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 360px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: #3b82f6;
+}
+
+/* ---------------------------------------------------
+   Table
+   --------------------------------------------------- */
+.tableWrapper {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 0.875rem 1.25rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* ---------------------------------------------------
+   User cells
+   --------------------------------------------------- */
+.userId {
+  color: #94a3b8 !important;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.userName {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.userEmail {
+  color: #64748b !important;
+}
+
+.userDate {
+  color: #94a3b8 !important;
+  font-size: 0.8rem;
+}
+
+/* ---------------------------------------------------
+   Role badges
+   --------------------------------------------------- */
+.roleBadge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.roleAdmin {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.roleCajero {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.roleInventario {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+/* ---------------------------------------------------
+   Empty / loading
+   --------------------------------------------------- */
+.empty {
+  text-align: center;
+  padding: 3rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #94a3b8;
+}
+
+/* ---------------------------------------------------
+   Buttons
+   --------------------------------------------------- */
+.primaryBtn {
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.primaryBtn:hover {
+  background: #1e293b;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryBtn {
+  background: #f1f5f9;
+  color: #334155;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.secondaryBtn:hover {
+  background: #e2e8f0;
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------
+   Modal
+   --------------------------------------------------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.closeBtn:hover {
+  color: #0f172a;
+}
+
+.modalBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ---------------------------------------------------
+   Form fields
+   --------------------------------------------------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.input,
+.select {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ---------------------------------------------------
+   Error
+   --------------------------------------------------- */
+.errorMsg {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}

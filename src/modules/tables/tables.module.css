@@ -1,0 +1,157 @@
+.container {
+  padding: 24px;
+  background: #f3f4f6;
+  min-height: 100%;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+/* ===== GRID ===== */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* ===== TABLE CARD ===== */
+
+.tableCard {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: 0.2s ease;
+}
+
+.tableCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Header */
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tableIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e; /* ocupada */
+}
+
+.tableHeader h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+}
+
+.tableTotal {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f766e;
+}
+
+/* ===== Orders inside table ===== */
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orderCard {
+  background: #f8fafb;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: 0.15s ease;
+}
+
+.orderCard:hover {
+  background: #eef2f3;
+}
+
+/* Top row */
+
+.orderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderId {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Badge */
+
+.statusBadge {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Bottom row */
+
+.orderBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderTotal {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Buttons */
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.primaryBtn {
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: none;
+  background: #0f766e;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  background: #136f6f;
+}
+
+.secondaryBtn {
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: none;
+  background: #e5e7eb;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background: #d1d5db;
+}

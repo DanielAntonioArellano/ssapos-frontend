@@ -1,0 +1,443 @@
+/* ===================================================
+   salesReport.module.css
+   =================================================== */
+
+.container {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+/* ---------------------------------------------------
+   Header
+   --------------------------------------------------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0;
+}
+
+/* ---------------------------------------------------
+   Tabs
+   --------------------------------------------------- */
+.tabs {
+  display: flex;
+  background: #e2e8f0;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.tab {
+  padding: 0.5rem 1.25rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabActive {
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------------------------------------------------
+   Panel base
+   --------------------------------------------------- */
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.panelTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.panelSub {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0.25rem 0 0;
+}
+
+.liveBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #22c55e;
+  background: #dcfce7;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+/* ---------------------------------------------------
+   Stats Grid
+   --------------------------------------------------- */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.statCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--accent, #3b82f6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.statSub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ---------------------------------------------------
+   Bottom grid (top items + recent sales)
+   --------------------------------------------------- */
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.topItems,
+.recentSales {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---------------------------------------------------
+   Table
+   --------------------------------------------------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th {
+  text-align: left;
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 0 0 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table td {
+  padding: 0.6rem 0;
+  color: #334155;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.shareBadge {
+  background: #eff6ff;
+  color: #3b82f6;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+/* ---------------------------------------------------
+   Sale list
+   --------------------------------------------------- */
+.saleList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.saleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.875rem;
+}
+
+.saleRow:last-child {
+  border-bottom: none;
+}
+
+.saleLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.saleRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.saleId {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.saleTime {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.saleTotal {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.payBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.payEfectivo {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.payTarjeta {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.positivo {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.negativo {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------
+   History Panel
+   --------------------------------------------------- */
+.historyPanel {
+  /* wrapper */
+}
+
+.historyGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .historyGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.historyCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.historyCard:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.historyCardActive {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.historyCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.historyDate {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.historyTotal {
+  font-weight: 700;
+  color: #22c55e;
+  font-size: 0.9rem;
+}
+
+.historyCardSub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ---------------------------------------------------
+   History Detail
+   --------------------------------------------------- */
+.historyDetail {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  min-height: 400px;
+}
+
+.emptyDetail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: 0.75rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.emptyDetail span {
+  font-size: 2rem;
+}
+
+.cajaDetail {
+  /* wrapper */
+}
+
+.detailHeader {
+  margin-bottom: 1.25rem;
+}
+
+.detailHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.detailStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* ---------------------------------------------------
+   Today Panel wrapper
+   --------------------------------------------------- */
+.todayPanel {
+  /* no extra styles needed */
+}
+
+/* ---------------------------------------------------
+   No caja / loading / empty
+   --------------------------------------------------- */
+.noCaja {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.empty {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  padding: 1rem 0;
+}

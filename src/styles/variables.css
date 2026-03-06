@@ -1,0 +1,11 @@
+:root {
+  --color-primary: #0F4F4F;
+  --color-primary-light: #DCEFEF;
+  --color-background: #F4F6F6;
+  --color-white: #FFFFFF;
+  --color-gray-light: #E6E8E8;
+  --color-text-dark: #1E1E1E;
+
+  --radius-large: 20px;
+  --radius-medium: 14px;
+}
