@@ -5,7 +5,7 @@ import { apiRequest } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import CreateProductModal from "./CreateProductModal";
 import { useCaja } from "../../context/CajaContext";
-import CheckoutModal from "./CheckoutModal";
+import CheckoutModal from "./CheckOutModal";
 import GastoMovimientoModal from "./Gastomovientomodal";
 import { useToast } from "../../context/ToastContext";
 
@@ -273,7 +273,7 @@ export default function PosPage() {
       <div className={styles.container}>
         <div className={styles.productsSection}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-            <h3>Products</h3>
+            <h3>Productos</h3>
             <button className={styles.addProductBtn} onClick={() => setShowGastoModal(true)}>
               + Gasto / Entrada
             </button>
@@ -313,13 +313,13 @@ export default function PosPage() {
                 className={`${styles.toggleOption} ${orderType === "DELIVERY" ? styles.activeLabel : ""}`}
                 onClick={() => { setOrderType("DELIVERY"); setTableNumber(null); }}
               >
-                Delivery
+                Domicilio
               </button>
               <button
                 className={`${styles.toggleOption} ${orderType === "DINE_IN" ? styles.activeLabel : ""}`}
                 onClick={() => setOrderType("DINE_IN")}
               >
-                Dine-In
+                Comer dentro
               </button>
             </div>
           </div>
@@ -329,7 +329,7 @@ export default function PosPage() {
               <label>Mesa</label>
               <input
                 type="number"
-                min={1}
+                
                 value={tableNumber ?? ""}
                 onChange={(e) => setTableNumber(Number(e.target.value))}
               />
@@ -416,14 +416,14 @@ export default function PosPage() {
                 onClick={handleSubmitOrder}
                 disabled={loading}
               >
-                {editMode ? "Update Order" : "Create Order"}
+                {editMode ? "Actualizar Orden" : "Crear Orden"}
               </button>
               <button
                 className={styles.primaryBtn}
                 onClick={handleChargeOrder}
                 disabled={loading || !caja || cart.length === 0}
               >
-                {loading ? "Procesando..." : "Charge Order"}
+                {loading ? "Procesando..." : "Cobrar Orden"}
               </button>
             </div>
           </div>

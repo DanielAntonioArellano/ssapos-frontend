@@ -122,7 +122,7 @@ export default function OrdersPage() {
 
       <div className={styles.content}>
         <div className={styles.filters}>
-          <h3>Filters</h3>
+          <h3>Filtros</h3>
           <input
             placeholder="Buscar por cliente o #orden..."
             value={search}
@@ -234,7 +234,7 @@ function OrderCard({
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
-        <strong>Order #{order.id}</strong>
+        <strong>Ordenes #{order.id}</strong>
       </div>
       <div className={styles.cardBody}>
         <p>{order.clientName ?? "Sin cliente"}</p>
@@ -257,7 +257,7 @@ function OrderCard({
                 className={styles.primaryBtn}
                 onClick={() => onStartPrep(order.id)}
               >
-                Start Preparation
+                Iniciar preparación
               </button>
             )}
           </>
@@ -270,7 +270,7 @@ function OrderCard({
                 className={styles.primaryBtn}
                 onClick={() => onSendDelivery(order.id)}
               >
-                Send to Delivery
+                Cambiar a Enviado
               </button>
             )}
             {can.changeStatus && (
@@ -278,7 +278,7 @@ function OrderCard({
                 className={styles.secondaryBtn}
                 onClick={() => onBackOrdered(order.id)}
               >
-                Back
+                Volver a Ordenado
               </button>
             )}
           </>
@@ -289,7 +289,7 @@ function OrderCard({
             className={styles.primaryBtn}
             onClick={() => onCheckout(order)}
           >
-            Checkout
+            Cobrar
           </button>
         )}
 
