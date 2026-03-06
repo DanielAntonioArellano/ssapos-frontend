@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export async function apiRequest(
   endpoint: string,
@@ -16,9 +16,9 @@ export async function apiRequest(
   });
 
   if (!response.ok) {
-  const error = await response.json();
-  throw new Error(error.message || "Error en la petición");
-}
+    const error = await response.json();
+    throw new Error(error.message || "Error en la petición");
+  }
 
-return response.json();
+  return response.json();
 }
