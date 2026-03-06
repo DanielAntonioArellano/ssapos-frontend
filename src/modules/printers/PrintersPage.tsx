@@ -28,11 +28,17 @@ const ROLE_COLORS: Record<string, string> = {
   BARRA:  "#7c3aed",
 };
 
-const EMPTY_FORM = {
+const EMPTY_FORM: {
+  name: string;
+  ip: string;
+  port: number;
+  role: "CAJA" | "COCINA" | "BARRA";
+  active: boolean;
+} = {
   name: "",
   ip: "",
   port: 9100,
-  role: "CAJA" as const,
+  role: "CAJA",
   active: true,
 };
 
