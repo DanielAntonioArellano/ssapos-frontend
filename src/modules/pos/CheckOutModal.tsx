@@ -5,8 +5,9 @@ import { useCaja } from "../../context/CajaContext";
 import { useToast } from "../../context/ToastContext";
 
 interface CartItem {
-  id: number;
-  name: string;
+  id?: number;
+  name?: string;
+  customName?: string;
   quantity: number;
   priceSell: number;
 }
@@ -77,9 +78,9 @@ export default function CheckoutModal({
         <h2>Resumen de Venta</h2>
 
         <div className={styles.checkoutItems}>
-          {cart.map((item) => (
-            <div key={item.id} className={styles.checkoutRow}>
-              <span>{item.name} x {item.quantity}</span>
+          {cart.map((item, index) => (
+            <div key={index} className={styles.checkoutRow}>
+              <span>{item.customName || item.name} x {item.quantity}</span>
               <span>${(item.priceSell * item.quantity).toFixed(2)}</span>
             </div>
           ))}
