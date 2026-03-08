@@ -62,6 +62,9 @@ export default function PosPage() {
 
   const [showGastoModal, setShowGastoModal] = useState(false);
 
+  const [discount, setDiscount] = useState<string>("");
+  const [showDiscountForm, setShowDiscountForm] = useState(false);
+
   useEffect(() => {
     loadProducts();
     loadCategories();
@@ -153,10 +156,31 @@ export default function PosPage() {
     );
   }
 
-  const total = cart.reduce((sum, item) => sum + item.priceSell * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.priceSell * item.quantity, 0);
+  const discountNum = parseFloat(discount) || 0;
+  const total = Math.max(0, subtotal - discountNum);
 
-  // ── Payload base de la orden ──────────────────────────
-  function buildPayload(requirePhone = true) {
+  // Distribuye el descuento proporcionalmente entre los items
+  function buildItemsWithDiscount() {
+    if (discountNum <= 0 || subtotal === 0) {
+      return cart.map((item) => ({
+        productId: item.id ?? null,
+        customName: item.customName ?? null,
+        quantity: item.quantity,
+        priceUnit: item.priceSell,
+      }));
+    }
+
+    const ratio = total / subtotal;
+    return cart.map((item) => ({
+      productId: item.id ?? null,
+      customName: item.customName ?? null,
+      quantity: item.quantity,
+      priceUnit: parseFloat((item.priceSell * ratio).toFixed(4)),
+    }));
+  }
+
+  function buildPayload() {
     return {
       userId: user!.id,
       type: orderType,
@@ -164,12 +188,7 @@ export default function PosPage() {
       clientName: clientName || undefined,
       clientPhone: clientPhone || undefined,
       clientNotes: clientNotes || undefined,
-      items: cart.map((item) => ({
-        productId: item.id ?? null,
-        customName: item.customName ?? null,
-        quantity: item.quantity,
-        priceUnit: item.priceSell,
-      })),
+      items: buildItemsWithDiscount(),
     };
   }
 
@@ -182,9 +201,10 @@ export default function PosPage() {
     setClientNotes("");
     setEditMode(false);
     setCurrentOrderId(null);
+    setDiscount("");
+    setShowDiscountForm(false);
   }
 
-  // ── Crear / actualizar orden sin cobrar ───────────────
   async function handleSubmitOrder() {
     if (!user) return;
 
@@ -236,7 +256,6 @@ export default function PosPage() {
     }
   }
 
-  // ── Charge Order: crea la orden si no existe y cobra ──
   async function handleChargeOrder() {
     if (!user || !caja) return;
 
@@ -250,11 +269,10 @@ export default function PosPage() {
 
       let orderId = currentOrderId;
 
-      // Si no hay orden creada aún, la crea silenciosamente
       if (!orderId) {
         const order = await apiRequest("/orders", {
           method: "POST",
-          body: JSON.stringify(buildPayload(false)),
+          body: JSON.stringify(buildPayload()),
         });
         orderId = order.id;
         setCurrentOrderId(orderId);
@@ -329,7 +347,6 @@ export default function PosPage() {
               <label>Mesa</label>
               <input
                 type="number"
-                
                 value={tableNumber ?? ""}
                 onChange={(e) => setTableNumber(Number(e.target.value))}
               />
@@ -404,9 +421,40 @@ export default function PosPage() {
 
           <div className={styles.summary}>
             <div className={styles.summaryRow}>
+              <span>Subtotal</span>
+              <strong>${subtotal.toFixed(2)}</strong>
+            </div>
+
+            {/* Descuento */}
+            <div className={styles.summaryRow}>
+              <button
+                className={styles.discountBtn}
+                onClick={() => setShowDiscountForm(!showDiscountForm)}
+              >
+                {showDiscountForm ? "— Cancelar descuento" : "+ Agregar descuento"}
+              </button>
+              {discountNum > 0 && (
+                <span className={styles.discountAmount}>-${discountNum.toFixed(2)}</span>
+              )}
+            </div>
+
+            {showDiscountForm && (
+              <div className={styles.discountForm}>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="Monto de descuento"
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className={styles.summaryRow}>
               <span>Total</span>
               <strong>${total.toFixed(2)}</strong>
             </div>
+
             <div className={styles.metaInfo}>
               {cart.length} productos • {cart.reduce((s, i) => s + i.quantity, 0)} items
             </div>

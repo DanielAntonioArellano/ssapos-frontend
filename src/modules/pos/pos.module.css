@@ -614,4 +614,39 @@
   outline: none;
   border-color: #0f766e;
 }
+/* Descuento */
+.discountBtn {
+  background: none;
+  border: none;
+  color: #0F4C4C;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.discountAmount {
+  color: #DC2626;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.discountForm {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.discountForm input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.discountForm input:focus {
+  border-color: #0F4C4C;
+}
 
