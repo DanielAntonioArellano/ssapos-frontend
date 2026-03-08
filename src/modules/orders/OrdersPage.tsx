@@ -252,7 +252,14 @@ export default function OrdersPage() {
             orders={completed}
             can={can}
             navigate={navigate}
-            onDelete={(id: number) => setDeleteOrderId(id)}
+            onReprint={async (id: number) => {
+              try {
+                await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
+                toast("Ticket reenviado a impresora", "success");
+              } catch (err: any) {
+                toast(err.message ?? "Error al reimprimir", "error");
+              }
+            }}
           />
         </div>
       </div>
@@ -294,6 +301,7 @@ function OrderColumn({
   onBackOrdered,
   onCheckout,
   onDelete,
+  onReprint,
 }: any) {
   return (
     <div className={styles.column}>
@@ -313,6 +321,7 @@ function OrderColumn({
             onBackOrdered={onBackOrdered}
             onCheckout={onCheckout}
             onDelete={onDelete}
+            onReprint={onReprint}
           />
         ))}
       </div>
@@ -329,6 +338,7 @@ function OrderCard({
   onBackOrdered,
   onCheckout,
   onDelete,
+  onReprint,
 }: any) {
   return (
     <div className={styles.card}>
@@ -392,12 +402,23 @@ function OrderCard({
           </button>
         )}
 
-        <button
-          className={styles.deleteBtn}
-          onClick={() => onDelete(order.id)}
-        >
-          Eliminar
-        </button>
+        {order.status === "COMPLETED" && onReprint && (
+          <button
+            className={styles.secondaryBtn}
+            onClick={() => onReprint(order.id)}
+          >
+            🖨 Reimprimir
+          </button>
+        )}
+
+        {order.status !== "COMPLETED" && onDelete && (
+          <button
+            className={styles.deleteBtn}
+            onClick={() => onDelete(order.id)}
+          >
+            Eliminar
+          </button>
+        )}
 
       </div>
     </div>
