@@ -31,15 +31,16 @@ export default function CheckoutModal({
   const { toast } = useToast();
 
   const [paymentType, setPaymentType] = useState<"EFECTIVO" | "TARJETA">("EFECTIVO");
-  const [received, setReceived] = useState<number>(0);
+  const [received, setReceived] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  const change = paymentType === "EFECTIVO" && received > total
-    ? received - total
+  const receivedNum = parseFloat(received) || 0;
+  const change = paymentType === "EFECTIVO" && receivedNum > total
+    ? receivedNum - total
     : 0;
 
   async function handleConfirm() {
-    if (paymentType === "EFECTIVO" && received < total) {
+    if (paymentType === "EFECTIVO" && receivedNum < total) {
       toast("El monto recibido es insuficiente", "warning");
       return;
     }
@@ -47,7 +48,6 @@ export default function CheckoutModal({
     try {
       setLoading(true);
 
-      // ── Checkout: devuelve la sale creada ─────────────
       const sale = await apiRequest(`/orders/${orderId}/checkout`, {
         method: "POST",
         body: JSON.stringify({ paymentType }),
@@ -55,13 +55,11 @@ export default function CheckoutModal({
 
       await refreshCaja();
 
-      // ── Impresión automática ──────────────────────────
       try {
         await apiRequest(`/tickets/print/sale/${sale.id}`, { method: "POST" });
       } catch {
         toast("Venta procesada, pero no se pudo imprimir", "warning");
       }
-      // ─────────────────────────────────────────────────
 
       toast("Venta procesada exitosamente", "success");
       onSuccess();
@@ -99,7 +97,7 @@ export default function CheckoutModal({
               type="radio"
               value="EFECTIVO"
               checked={paymentType === "EFECTIVO"}
-              onChange={() => setPaymentType("EFECTIVO")}
+              onChange={() => { setPaymentType("EFECTIVO"); setReceived(""); }}
             />
             Efectivo
           </label>
@@ -108,7 +106,7 @@ export default function CheckoutModal({
               type="radio"
               value="TARJETA"
               checked={paymentType === "TARJETA"}
-              onChange={() => setPaymentType("TARJETA")}
+              onChange={() => { setPaymentType("TARJETA"); setReceived(""); }}
             />
             Tarjeta
           </label>
@@ -119,8 +117,9 @@ export default function CheckoutModal({
             <label>Monto recibido</label>
             <input
               type="number"
+              placeholder={`$${total.toFixed(2)}`}
               value={received}
-              onChange={(e) => setReceived(Number(e.target.value))}
+              onChange={(e) => setReceived(e.target.value)}
             />
             <div className={styles.changeRow}>
               <span>Cambio:</span>

@@ -37,9 +37,12 @@ export default function TablesPage() {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 5000);
+    const interval = setInterval(() => {
+      if (checkoutOrder) return;
+      fetchOrders();
+    }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [checkoutOrder]);
 
   const handleReprint = async (id: number) => {
     try {

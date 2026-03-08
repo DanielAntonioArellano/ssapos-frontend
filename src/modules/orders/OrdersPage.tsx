@@ -149,9 +149,13 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 20000);
+    const interval = setInterval(() => {
+      // No recargar si hay un modal abierto
+      if (checkoutOrder || deleteOrderId) return;
+      fetchOrders();
+    }, 20000);
     return () => clearInterval(interval);
-  }, []);
+  }, [checkoutOrder, deleteOrderId]);
 
   const changeStatus = async (id: number, status: string) => {
     try {
