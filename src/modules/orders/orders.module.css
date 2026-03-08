@@ -191,3 +191,80 @@
   font-size: 12px;
   color: #6b7280;
 }
+/* Modal eliminar orden */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalBox {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.modalSubtitle {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.modalInput:focus {
+  border-color: #0F4C4C;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.deleteBtn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #DC2626;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: #B91C1C;
+}
+
+.errorMsg {
+  color: #DC2626;
+  font-size: 13px;
+  background: #FEF2F2;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
