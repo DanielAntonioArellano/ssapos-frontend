@@ -38,6 +38,87 @@ type CheckoutOrder = {
   items: CartItem[];
 };
 
+// ---------------------------------------------------
+// Modal de contraseña admin para eliminar
+// ---------------------------------------------------
+interface DeleteModalProps {
+  orderId: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function DeleteOrderModal({ orderId, onClose, onSuccess }: DeleteModalProps) {
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  async function handleDelete() {
+    if (!password.trim()) {
+      setError("Ingresa la contraseña de administrador");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      await apiRequest(`/orders/${orderId}`, {
+        method: "DELETE",
+        body: JSON.stringify({ adminPassword: password }),
+      });
+      toast(`Orden #${orderId} eliminada`, "success");
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message ?? "Error al eliminar la orden");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalBox}>
+        <h3 className={styles.modalTitle}>Eliminar Orden #{orderId}</h3>
+        <p className={styles.modalSubtitle}>
+          Ingresa la contraseña de un administrador para confirmar.
+        </p>
+
+        {error && <div className={styles.errorMsg}>{error}</div>}
+
+        <input
+          className={styles.modalInput}
+          type="password"
+          placeholder="Contraseña de administrador"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleDelete()}
+          autoFocus
+        />
+
+        <div className={styles.modalActions}>
+          <button
+            className={styles.secondaryBtn}
+            onClick={onClose}
+            disabled={loading}
+          >
+            Cancelar
+          </button>
+          <button
+            className={styles.deleteBtn}
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {loading ? "Eliminando..." : "Eliminar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Main Page
+// ---------------------------------------------------
 export default function OrdersPage() {
   const { user } = useAuth();
   const { can } = useRole();
@@ -49,6 +130,7 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [checkoutOrder, setCheckoutOrder] = useState<CheckoutOrder | null>(null);
   const [search, setSearch] = useState("");
+  const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -97,7 +179,6 @@ export default function OrdersPage() {
     setCheckoutOrder(mapped);
   };
 
-  // ── Filtro por nombre de cliente o # de orden ─────────
   const filtered = search.trim()
     ? orders.filter(o => {
         const q = search.toLowerCase();
@@ -147,6 +228,7 @@ export default function OrdersPage() {
             can={can}
             navigate={navigate}
             onStartPrep={(id: number) => changeStatus(id, "PREPARATION")}
+            onDelete={(id: number) => setDeleteOrderId(id)}
           />
           <OrderColumn
             title="Preparation"
@@ -155,6 +237,7 @@ export default function OrdersPage() {
             navigate={navigate}
             onSendDelivery={(id: number) => changeStatus(id, "DELIVERY")}
             onBackOrdered={(id: number) => changeStatus(id, "ORDERED")}
+            onDelete={(id: number) => setDeleteOrderId(id)}
           />
           <OrderColumn
             title="Delivery"
@@ -162,12 +245,14 @@ export default function OrdersPage() {
             can={can}
             navigate={navigate}
             onCheckout={openCheckout}
+            onDelete={(id: number) => setDeleteOrderId(id)}
           />
           <OrderColumn
             title="Completed"
             orders={completed}
             can={can}
             navigate={navigate}
+            onDelete={(id: number) => setDeleteOrderId(id)}
           />
         </div>
       </div>
@@ -180,6 +265,17 @@ export default function OrdersPage() {
           onClose={() => setCheckoutOrder(null)}
           onSuccess={() => {
             setCheckoutOrder(null);
+            fetchOrders();
+          }}
+        />
+      )}
+
+      {deleteOrderId && (
+        <DeleteOrderModal
+          orderId={deleteOrderId}
+          onClose={() => setDeleteOrderId(null)}
+          onSuccess={() => {
+            setDeleteOrderId(null);
             fetchOrders();
           }}
         />
@@ -197,6 +293,7 @@ function OrderColumn({
   onSendDelivery,
   onBackOrdered,
   onCheckout,
+  onDelete,
 }: any) {
   return (
     <div className={styles.column}>
@@ -215,6 +312,7 @@ function OrderColumn({
             onSendDelivery={onSendDelivery}
             onBackOrdered={onBackOrdered}
             onCheckout={onCheckout}
+            onDelete={onDelete}
           />
         ))}
       </div>
@@ -230,6 +328,7 @@ function OrderCard({
   onSendDelivery,
   onBackOrdered,
   onCheckout,
+  onDelete,
 }: any) {
   return (
     <div className={styles.card}>
@@ -292,6 +391,13 @@ function OrderCard({
             Cobrar
           </button>
         )}
+
+        <button
+          className={styles.deleteBtn}
+          onClick={() => onDelete(order.id)}
+        >
+          Eliminar
+        </button>
 
       </div>
     </div>
