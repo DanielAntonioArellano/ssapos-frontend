@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import styles from "./tables.module.css";
 import CheckoutModal from "../pos/CheckOutModal";
 
@@ -21,19 +22,16 @@ type Order = {
 
 export default function TablesPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
 
   const fetchOrders = async () => {
-    // Obtener fechaApertura del turno actual
     const caja = await apiRequest("/caja/actual");
     const desde = caja?.fechaApertura ?? new Date().toISOString();
     const hasta = new Date().toISOString();
-
-    const data = await apiRequest(
-      `/orders?from=${desde}&to=${hasta}`
-    );
+    const data = await apiRequest(`/orders?from=${desde}&to=${hasta}`);
     setOrders(data);
   };
 
@@ -42,6 +40,15 @@ export default function TablesPage() {
     const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleReprint = async (id: number) => {
+    try {
+      await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
+      toast("Ticket reenviado a impresora", "success");
+    } catch (err: any) {
+      toast(err.message ?? "Error al reimprimir", "error");
+    }
+  };
 
   const dineInOrders = orders.filter(
     o => o.type === "DINE_IN" && o.status !== "COMPLETED" && o.status !== "CANCELLED"
@@ -98,6 +105,9 @@ export default function TablesPage() {
                             Editar
                           </button>
                         )}
+                        <button className={styles.secondaryBtn} onClick={() => handleReprint(order.id)}>
+                          🖨 Reimprimir
+                        </button>
                         {user?.role === "CAJERO" && order.status === "ORDERED" && (
                           <button className={styles.primaryBtn} onClick={() => openCheckout(order)}>
                             Cobrar
@@ -139,6 +149,11 @@ export default function TablesPage() {
                         </div>
                         <div className={styles.orderBottom}>
                           <span className={styles.orderTotal}>${order.total.toFixed(2)}</span>
+                          <div className={styles.actions}>
+                            <button className={styles.secondaryBtn} onClick={() => handleReprint(order.id)}>
+                              🖨 Reimprimir
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}

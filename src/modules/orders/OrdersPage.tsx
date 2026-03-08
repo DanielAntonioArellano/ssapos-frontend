@@ -229,6 +229,14 @@ export default function OrdersPage() {
             navigate={navigate}
             onStartPrep={(id: number) => changeStatus(id, "PREPARATION")}
             onDelete={(id: number) => setDeleteOrderId(id)}
+            onReprint={async (id: number) => {
+              try {
+                await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
+                toast("Ticket reenviado a impresora", "success");
+              } catch (err: any) {
+                toast(err.message ?? "Error al reimprimir", "error");
+              }
+            }}
           />
           <OrderColumn
             title="Preparation"
@@ -246,6 +254,14 @@ export default function OrdersPage() {
             navigate={navigate}
             onCheckout={openCheckout}
             onDelete={(id: number) => setDeleteOrderId(id)}
+            onReprint={async (id: number) => {
+              try {
+                await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
+                toast("Ticket reenviado a impresora", "success");
+              } catch (err: any) {
+                toast(err.message ?? "Error al reimprimir", "error");
+              }
+            }}
           />
           <OrderColumn
             title="Completed"
@@ -403,6 +419,15 @@ function OrderCard({
         )}
 
         {order.status === "COMPLETED" && onReprint && (
+          <button
+            className={styles.secondaryBtn}
+            onClick={() => onReprint(order.id)}
+          >
+            🖨 Reimprimir
+          </button>
+        )}
+
+        {(order.status === "ORDERED" || order.status === "DELIVERY") && onReprint && (
           <button
             className={styles.secondaryBtn}
             onClick={() => onReprint(order.id)}
