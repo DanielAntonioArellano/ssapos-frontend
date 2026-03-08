@@ -64,6 +64,7 @@ export default function PosPage() {
 
   const [discount, setDiscount] = useState<string>("");
   const [showDiscountForm, setShowDiscountForm] = useState(false);
+  const [showClientForm, setShowClientForm] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -203,6 +204,7 @@ export default function PosPage() {
     setCurrentOrderId(null);
     setDiscount("");
     setShowDiscountForm(false);
+    setShowClientForm(false);
   }
 
   async function handleSubmitOrder() {
@@ -353,23 +355,35 @@ export default function PosPage() {
             </div>
           )}
 
-          {orderType === "DELIVERY" && (
-            <div className={styles.deliverySection}>
+          {/* Acordeón datos del cliente */}
+          <button
+            className={styles.accordionBtn}
+            onClick={() => setShowClientForm(!showClientForm)}
+          >
+            <span>Datos del cliente</span>
+            <span>{showClientForm ? "▲" : "▼"}</span>
+          </button>
+
+          {showClientForm && (
+            <div className={styles.accordionBody}>
+              {orderType === "DELIVERY" && (
+                <>
+                  <div className={styles.metaInput}>
+                    <label>Nombre / Dirección</label>
+                    <input value={clientName} onChange={(e) => setClientName(e.target.value)} />
+                  </div>
+                  <div className={styles.metaInput}>
+                    <label>Teléfono</label>
+                    <input type="number" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
+                  </div>
+                </>
+              )}
               <div className={styles.metaInput}>
-                <label>Nombre / Dirección</label>
-                <input value={clientName} onChange={(e) => setClientName(e.target.value)} />
-              </div>
-              <div className={styles.metaInput}>
-                <label>Teléfono</label>
-                <input type="number" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
+                <label>Notas</label>
+                <textarea value={clientNotes} onChange={(e) => setClientNotes(e.target.value)} />
               </div>
             </div>
           )}
-
-          <div className={styles.metaInput}>
-            <label>Notas</label>
-            <textarea value={clientNotes} onChange={(e) => setClientNotes(e.target.value)} />
-          </div>
 
           <button className={styles.addCustomBtn} onClick={() => setShowCustomForm(!showCustomForm)}>
             + Producto Personalizado

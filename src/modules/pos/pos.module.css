@@ -649,4 +649,31 @@
 .discountForm input:focus {
   border-color: #0F4C4C;
 }
+/* Acordeón datos del cliente */
+.accordionBtn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.accordionBtn:hover {
+  background: #E5E7EB;
+}
+
+.accordionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
 
