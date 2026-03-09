@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: any) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cajaSkipped, setCajaSkipped] = useState(false);
 
-  if (loading) return null;
+  if (loading || !user) return null;
 
   const isAdmin = user?.role === "ADMIN" || user?.isSuperAdmin;
 
