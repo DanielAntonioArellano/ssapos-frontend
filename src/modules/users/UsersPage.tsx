@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import styles from "./users.module.css";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Eye, EyeOff } from "lucide-react";
 
 // ---------------------------------------------------
 // Types
@@ -48,6 +48,9 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,6 +87,59 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function PasswordInput({
+    value,
+    onChange,
+    show,
+    onToggle,
+    placeholder,
+    autoFocus,
+    onEnter,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+    show: boolean;
+    onToggle: () => void;
+    placeholder: string;
+    autoFocus?: boolean;
+    onEnter?: () => void;
+  }) {
+    return (
+      <div style={{ position: "relative" }}>
+        <input
+          className={styles.input}
+          type={show ? "text" : "password"}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoFocus={autoFocus}
+          onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
+          style={{ paddingRight: "2.75rem", width: "100%", boxSizing: "border-box" }}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          tabIndex={-1}
+          style={{
+            position: "absolute",
+            right: "0.75rem",
+            top: "50%",
+            transform: "translateY(-50%)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "#94a3b8",
+            display: "flex",
+            alignItems: "center",
+            padding: 0,
+          }}
+        >
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -131,36 +187,36 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
 
           <div className={styles.field}>
             <label className={styles.label}>Contraseña actual</label>
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="Contraseña actual del usuario"
+            <PasswordInput
               value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              onChange={setCurrentPassword}
+              show={showCurrent}
+              onToggle={() => setShowCurrent((v) => !v)}
+              placeholder="Contraseña actual del usuario"
               autoFocus
             />
           </div>
 
           <div className={styles.field}>
             <label className={styles.label}>Nueva contraseña</label>
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="Mínimo 6 caracteres"
+            <PasswordInput
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={setNewPassword}
+              show={showNew}
+              onToggle={() => setShowNew((v) => !v)}
+              placeholder="Mínimo 6 caracteres"
             />
           </div>
 
           <div className={styles.field}>
             <label className={styles.label}>Confirmar nueva contraseña</label>
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="Repite la nueva contraseña"
+            <PasswordInput
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              onChange={setConfirm}
+              show={showConfirm}
+              onToggle={() => setShowConfirm((v) => !v)}
+              placeholder="Repite la nueva contraseña"
+              onEnter={handleSubmit}
             />
           </div>
         </div>
@@ -193,6 +249,7 @@ function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
     password: "",
     role: "CAJERO" as Role,
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -257,14 +314,37 @@ function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
 
           <div className={styles.field}>
             <label className={styles.label}>Contraseña</label>
-            <input
-              className={styles.input}
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                className={styles.input}
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                style={{ paddingRight: "2.75rem", width: "100%", boxSizing: "border-box" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#94a3b8",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 0,
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           <div className={styles.field}>
