@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { apiRequest } from "../../services/api";
 import styles from "./AbrirCajaModal.module.css";
-import { Landmark, X } from "lucide-react";
+import { Landmark } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
 interface Props {
@@ -39,32 +39,6 @@ export default function AbrirCajaModal({ onSuccess, onSkip }: Props) {
     <div className={styles.overlay}>
       <div className={styles.modal}>
 
-        {/* Botón X solo visible para admins (cuando onSkip está definido) */}
-        {onSkip && (
-          <button
-            onClick={onSkip}
-            title="Continuar sin abrir caja"
-            style={{
-              position: "absolute",
-              top: "1rem",
-              right: "1rem",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#94a3b8",
-              display: "flex",
-              alignItems: "center",
-              padding: "0.25rem",
-              borderRadius: "6px",
-              transition: "color 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#0f172a")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
-          >
-            <X size={20} />
-          </button>
-        )}
-
         <div className={styles.iconWrapper}>
           <Landmark size={24} />
         </div>
@@ -91,6 +65,25 @@ export default function AbrirCajaModal({ onSuccess, onSkip }: Props) {
         <button className={styles.btn} onClick={handleOpen} disabled={loading}>
           {loading ? "Abriendo..." : "Abrir Caja"}
         </button>
+
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            disabled={loading}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#94a3b8",
+              fontSize: "0.85rem",
+              marginTop: "0.25rem",
+              textDecoration: "underline",
+              padding: "0.25rem",
+            }}
+          >
+            Continuar sin abrir caja
+          </button>
+        )}
 
       </div>
     </div>
