@@ -72,6 +72,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  overflow: hidden;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.card > div {
+  min-width: 0;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.card h4 {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6B7280;
 }
 
 .addBtn {
