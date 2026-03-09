@@ -40,6 +40,7 @@ type CancelledOrder = {
   createdAt: string;
   clientName: string | null;
   type: string;
+  cancelConcepto: string | null; // ← motivo de cancelación
   items: OrderItem[];
 };
 
@@ -259,6 +260,20 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
                 <span className={styles.saleTime}>{formatTime(order.createdAt)}</span>
                 {order.clientName && (
                   <span className={styles.saleTime}>{order.clientName}</span>
+                )}
+                {/* Motivo de cancelación */}
+                {order.cancelConcepto && (
+                  <span
+                    className={styles.saleTime}
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "#ef4444",
+                      fontStyle: "italic",
+                      marginTop: "0.15rem",
+                    }}
+                  >
+                    Motivo: {order.cancelConcepto}
+                  </span>
                 )}
                 {/* Items de la orden */}
                 <div style={{ marginTop: "0.2rem" }}>
@@ -594,7 +609,6 @@ export default function SalesReportPage() {
       setCajaActual(actual);
       setHistorico(all);
 
-      // Canceladas de hoy (rango desde inicio del día hasta ahora)
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
       const todayEnd = new Date();
@@ -605,9 +619,7 @@ export default function SalesReportPage() {
 
       setCancelledToday(cancelled);
 
-      // Canceladas por caja (usando fechaApertura y fechaCierre como rango)
       const closedCajas: Caja[] = (all as Caja[]).filter((c) => c.fechaCierre !== null);
-
       const cancelledPerCaja: Record<number, CancelledOrder[]> = {};
 
       await Promise.all(
