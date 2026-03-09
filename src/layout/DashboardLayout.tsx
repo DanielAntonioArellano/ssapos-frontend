@@ -15,8 +15,13 @@ export default function DashboardLayout({ children }: any) {
 
   if (loading || !user) return null;
 
-  const isAdmin = user?.role === "ADMIN" || user?.isSuperAdmin;
+const isAdmin = user?.role === "ADMIN" || user?.isSuperAdmin;
 
+console.log("user?.role:", user?.role);
+console.log("isAdmin:", isAdmin);
+console.log("caja:", caja);
+console.log("cajaSkipped:", cajaSkipped);
+console.log("mostrarModal:", mostrarModal);
   // Mostrar modal si no hay caja Y no la saltó
   const mostrarModal = !caja && !cajaSkipped;
 
