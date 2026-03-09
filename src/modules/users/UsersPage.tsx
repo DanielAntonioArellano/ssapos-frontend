@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../services/api";
+import { useToast } from "../../context/ToastContext";
 import styles from "./users.module.css";
+import { KeyRound } from "lucide-react";
 
 // ---------------------------------------------------
 // Types
@@ -28,10 +30,135 @@ function formatDate(iso: string) {
 }
 
 const ROLE_STYLES: Record<Role, { label: string; className: string }> = {
-  ADMIN:      { label: "Admin",      className: "roleAdmin" },
-  CAJERO:     { label: "Cajero",     className: "roleCajero" },
-  MESERO:     { label: "Mesero",     className: "roleMesero" },
+  ADMIN:  { label: "Admin",  className: "roleAdmin" },
+  CAJERO: { label: "Cajero", className: "roleCajero" },
+  MESERO: { label: "Mesero", className: "roleMesero" },
 };
+
+// ---------------------------------------------------
+// Change Password Modal
+// ---------------------------------------------------
+interface ChangePasswordModalProps {
+  user: User;
+  onClose: () => void;
+}
+
+function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
+  const { toast } = useToast();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit() {
+    setError(null);
+
+    if (!newPassword) {
+      setError("Ingresa la nueva contraseña");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+    if (newPassword !== confirm) {
+      setError("Las contraseñas no coinciden");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await apiRequest(`/users/${user.id}/password`, {
+        method: "PATCH",
+        body: JSON.stringify({ newPassword }),
+      });
+      toast(`Contraseña de ${user.name} actualizada`, "success");
+      onClose();
+    } catch (err: any) {
+      setError(err.message || "Error al cambiar contraseña");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <div className={styles.modalHeader}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <KeyRound size={18} color="#0f172a" />
+            <h2 className={styles.modalTitle}>Cambiar contraseña</h2>
+          </div>
+          <button className={styles.closeBtn} onClick={onClose}>✕</button>
+        </div>
+
+        <div className={styles.modalBody}>
+          {/* Info del usuario */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.75rem 1rem",
+            background: "#f8fafc",
+            borderRadius: "10px",
+            marginBottom: "1.25rem",
+          }}>
+            <div className={styles.avatar} style={{ flexShrink: 0 }}>
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem", color: "#0f172a" }}>
+                {user.name}
+              </p>
+              <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8" }}>
+                {user.email}
+              </p>
+            </div>
+            <span className={`${styles.roleBadge} ${styles[ROLE_STYLES[user.role].className]}`}
+              style={{ marginLeft: "auto" }}>
+              {ROLE_STYLES[user.role].label}
+            </span>
+          </div>
+
+          {error && <div className={styles.errorMsg}>{error}</div>}
+
+          <div className={styles.field}>
+            <label className={styles.label}>Nueva contraseña</label>
+            <input
+              className={styles.input}
+              type="password"
+              placeholder="Mínimo 6 caracteres"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Confirmar contraseña</label>
+            <input
+              className={styles.input}
+              type="password"
+              placeholder="Repite la contraseña"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            />
+          </div>
+        </div>
+
+        <div className={styles.modalFooter}>
+          <button className={styles.secondaryBtn} onClick={onClose} disabled={loading}>
+            Cancelar
+          </button>
+          <button className={styles.primaryBtn} onClick={handleSubmit} disabled={loading}>
+            {loading ? "Guardando..." : "Cambiar contraseña"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ---------------------------------------------------
 // Create User Modal
@@ -51,9 +178,7 @@ function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
@@ -66,12 +191,10 @@ function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
     try {
       setLoading(true);
       setError(null);
-
       await apiRequest("/users", {
         method: "POST",
         body: JSON.stringify(form),
       });
-
       onSuccess();
     } catch (err: any) {
       setError(err.message || "Error al crear usuario");
@@ -85,9 +208,7 @@ function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Nuevo Usuario</h2>
-          <button className={styles.closeBtn} onClick={onClose}>
-            ✕
-          </button>
+          <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
         <div className={styles.modalBody}>
@@ -144,18 +265,10 @@ function CreateUserModal({ onClose, onSuccess }: CreateUserModalProps) {
         </div>
 
         <div className={styles.modalFooter}>
-          <button
-            className={styles.secondaryBtn}
-            onClick={onClose}
-            disabled={loading}
-          >
+          <button className={styles.secondaryBtn} onClick={onClose} disabled={loading}>
             Cancelar
           </button>
-          <button
-            className={styles.primaryBtn}
-            onClick={handleSubmit}
-            disabled={loading}
-          >
+          <button className={styles.primaryBtn} onClick={handleSubmit} disabled={loading}>
             {loading ? "Creando..." : "Crear usuario"}
           </button>
         </div>
@@ -171,7 +284,8 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [changePwdUser, setChangePwdUser] = useState<User | null>(null);
   const [search, setSearch] = useState("");
 
   const fetchUsers = async () => {
@@ -215,11 +329,7 @@ export default function UsersPage() {
             {users.length} usuario{users.length !== 1 ? "s" : ""} registrado{users.length !== 1 ? "s" : ""}
           </p>
         </div>
-
-        <button
-          className={styles.primaryBtn}
-          onClick={() => setShowModal(true)}
-        >
+        <button className={styles.primaryBtn} onClick={() => setShowCreateModal(true)}>
           + Nuevo usuario
         </button>
       </div>
@@ -249,6 +359,7 @@ export default function UsersPage() {
                 <th>Email</th>
                 <th>Rol</th>
                 <th>Creado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -271,8 +382,31 @@ export default function UsersPage() {
                         {roleStyle.label}
                       </span>
                     </td>
-                    <td className={styles.userDate}>
-                      {formatDate(user.createdAt)}
+                    <td className={styles.userDate}>{formatDate(user.createdAt)}</td>
+                    <td>
+                      <button
+                        onClick={() => setChangePwdUser(user)}
+                        title="Cambiar contraseña"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                          padding: "0.35rem 0.75rem",
+                          background: "#f1f5f9",
+                          border: "none",
+                          borderRadius: "7px",
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          color: "#475569",
+                          cursor: "pointer",
+                          transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#e2e8f0")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                      >
+                        <KeyRound size={13} />
+                        Contraseña
+                      </button>
                     </td>
                   </tr>
                 );
@@ -282,14 +416,22 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Modal */}
-      {showModal && (
+      {/* Modal crear usuario */}
+      {showCreateModal && (
         <CreateUserModal
-          onClose={() => setShowModal(false)}
+          onClose={() => setShowCreateModal(false)}
           onSuccess={() => {
-            setShowModal(false);
+            setShowCreateModal(false);
             fetchUsers();
           }}
+        />
+      )}
+
+      {/* Modal cambiar contraseña */}
+      {changePwdUser && (
+        <ChangePasswordModal
+          user={changePwdUser}
+          onClose={() => setChangePwdUser(null)}
         />
       )}
     </div>
