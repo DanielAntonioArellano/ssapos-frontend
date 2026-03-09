@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../services/api";
 import styles from "./sales.module.css"
+import { Printer } from "lucide-react";
 
 // ---------------------------------------------------
 // Types
@@ -362,14 +363,69 @@ function HistoryPanel({ cajas }: { cajas: Caja[] }) {
 // ---------------------------------------------------
 function CajaDetail({ caja }: { caja: Caja }) {
   const r = calcResumen(caja);
+  const [printing, setPrinting] = useState(false);
+  const [printMsg, setPrintMsg] = useState<{ text: string; ok: boolean } | null>(null);
+
+  async function handlePrint() {
+    setPrinting(true);
+    setPrintMsg(null);
+    try {
+      await apiRequest(`/tickets/print/corte/${caja.id}`, { method: "POST" });
+      setPrintMsg({ text: "Corte enviado a impresora", ok: true });
+    } catch {
+      setPrintMsg({ text: "No se pudo imprimir el corte", ok: false });
+    } finally {
+      setPrinting(false);
+      setTimeout(() => setPrintMsg(null), 3000);
+    }
+  }
 
   return (
     <div className={styles.cajaDetail}>
-      <div className={styles.detailHeader}>
-        <h3>Caja #{caja.id} · {formatDate(caja.fechaApertura)}</h3>
-        <p className={styles.panelSub}>
-          {formatTime(caja.fechaApertura)} → {caja.fechaCierre ? formatTime(caja.fechaCierre) : "Abierta"}
-        </p>
+
+      {/* Header con botón reimprimir */}
+      <div className={styles.detailHeader} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+        <div>
+          <h3>Caja #{caja.id} · {formatDate(caja.fechaApertura)}</h3>
+          <p className={styles.panelSub}>
+            {formatTime(caja.fechaApertura)} → {caja.fechaCierre ? formatTime(caja.fechaCierre) : "Abierta"}
+            {caja.user ? ` · ${caja.user.name}` : ""}
+          </p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
+          <button
+            onClick={handlePrint}
+            disabled={printing}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              padding: "0.5rem 1rem",
+              background: printing ? "#e2e8f0" : "#0f172a",
+              color: printing ? "#94a3b8" : "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              cursor: printing ? "not-allowed" : "pointer",
+              transition: "background 0.2s",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Printer size={15} />
+            {printing ? "Imprimiendo..." : "Reimprimir corte"}
+          </button>
+          {printMsg && (
+            <span style={{
+              fontSize: "0.75rem",
+              color: printMsg.ok ? "#16a34a" : "#ef4444",
+              fontWeight: 500,
+            }}>
+              {printMsg.ok ? "✓" : "✗"} {printMsg.text}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className={styles.detailStats}>
