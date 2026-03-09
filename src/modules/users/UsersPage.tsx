@@ -45,6 +45,7 @@ interface ChangePasswordModalProps {
 
 function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
   const { toast } = useToast();
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,12 +54,16 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
   async function handleSubmit() {
     setError(null);
 
+    if (!currentPassword) {
+      setError("Ingresa la contraseña actual del usuario");
+      return;
+    }
     if (!newPassword) {
       setError("Ingresa la nueva contraseña");
       return;
     }
     if (newPassword.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+      setError("La nueva contraseña debe tener al menos 6 caracteres");
       return;
     }
     if (newPassword !== confirm) {
@@ -70,7 +75,7 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
       setLoading(true);
       await apiRequest(`/users/${user.id}/password`, {
         method: "PATCH",
-        body: JSON.stringify({ newPassword }),
+        body: JSON.stringify({ currentPassword, newPassword }),
       });
       toast(`Contraseña de ${user.name} actualizada`, "success");
       onClose();
@@ -114,13 +119,27 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
                 {user.email}
               </p>
             </div>
-            <span className={`${styles.roleBadge} ${styles[ROLE_STYLES[user.role].className]}`}
-              style={{ marginLeft: "auto" }}>
+            <span
+              className={`${styles.roleBadge} ${styles[ROLE_STYLES[user.role].className]}`}
+              style={{ marginLeft: "auto" }}
+            >
               {ROLE_STYLES[user.role].label}
             </span>
           </div>
 
           {error && <div className={styles.errorMsg}>{error}</div>}
+
+          <div className={styles.field}>
+            <label className={styles.label}>Contraseña actual</label>
+            <input
+              className={styles.input}
+              type="password"
+              placeholder="Contraseña actual del usuario"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoFocus
+            />
+          </div>
 
           <div className={styles.field}>
             <label className={styles.label}>Nueva contraseña</label>
@@ -130,16 +149,15 @@ function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps) {
               placeholder="Mínimo 6 caracteres"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              autoFocus
             />
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Confirmar contraseña</label>
+            <label className={styles.label}>Confirmar nueva contraseña</label>
             <input
               className={styles.input}
               type="password"
-              placeholder="Repite la contraseña"
+              placeholder="Repite la nueva contraseña"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
