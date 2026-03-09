@@ -27,6 +27,7 @@ type Movimiento = {
   id: number;
   tipo: "ENTRADA" | "SALIDA";
   monto: number;
+  motivo: string | null;
   descripcion: string | null;
 };
 
@@ -103,13 +104,10 @@ function calcResumen(caja: Caja) {
     caja.totalGeneral ??
     caja.montoInicial + efectivo + entradas - gastos - salidas;
 
-  // Top items
-  const itemMap: Record<string, { name: string; qty: number; total: number }> =
-    {};
+  const itemMap: Record<string, { name: string; qty: number; total: number }> = {};
   for (const venta of caja.ventas) {
     for (const item of venta.items ?? []) {
-      const name =
-        item.product?.name ?? item.customName ?? `Item #${item.id}`;
+      const name = item.product?.name ?? item.customName ?? `Item #${item.id}`;
       if (!itemMap[name]) itemMap[name] = { name, qty: 0, total: 0 };
       itemMap[name].qty += item.quantity;
       itemMap[name].total += item.subtotal;
@@ -120,14 +118,8 @@ function calcResumen(caja: Caja) {
     .slice(0, 5);
 
   return {
-    efectivo,
-    tarjeta,
-    gastos,
-    entradas,
-    salidas,
-    totalVentas,
-    totalGeneral,
-    topItems,
+    efectivo, tarjeta, gastos, entradas, salidas,
+    totalVentas, totalGeneral, topItems,
     ordenes: caja.ventas.length,
     avgTicket: caja.ventas.length ? totalVentas / caja.ventas.length : 0,
   };
@@ -136,22 +128,83 @@ function calcResumen(caja: Caja) {
 // ---------------------------------------------------
 // Stat Card
 // ---------------------------------------------------
-function StatCard({
-  label,
-  value,
-  sub,
-  accent,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  accent?: string;
+function StatCard({ label, value, sub, accent }: {
+  label: string; value: string; sub?: string; accent?: string;
 }) {
   return (
     <div className={styles.statCard} style={{ "--accent": accent } as any}>
       <span className={styles.statLabel}>{label}</span>
       <span className={styles.statValue}>{value}</span>
       {sub && <span className={styles.statSub}>{sub}</span>}
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Movimientos detallados (reutilizable)
+// ---------------------------------------------------
+function MovimientosDetalle({ movimientos, gastos }: {
+  movimientos: Movimiento[];
+  gastos: Gasto[];
+}) {
+  const entradas = movimientos.filter((m) => m.tipo === "ENTRADA");
+  const salidas  = movimientos.filter((m) => m.tipo === "SALIDA");
+
+  if (movimientos.length === 0 && gastos.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: "1.5rem" }}>
+      {entradas.length > 0 && (
+        <>
+          <h4 className={styles.sectionTitle}>Entradas</h4>
+          <div className={styles.saleList}>
+            {entradas.map((m) => (
+              <div key={m.id} className={styles.saleRow}>
+                <span className={styles.saleTime}>
+                  {m.motivo ?? m.descripcion ?? "Sin concepto"}
+                </span>
+                <span className={styles.positivo}>
+                  +{formatCurrency(m.monto)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {salidas.length > 0 && (
+        <>
+          <h4 className={styles.sectionTitle} style={{ marginTop: "1rem" }}>Salidas</h4>
+          <div className={styles.saleList}>
+            {salidas.map((m) => (
+              <div key={m.id} className={styles.saleRow}>
+                <span className={styles.saleTime}>
+                  {m.motivo ?? m.descripcion ?? "Sin concepto"}
+                </span>
+                <span className={styles.negativo}>
+                  -{formatCurrency(m.monto)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {gastos.length > 0 && (
+        <>
+          <h4 className={styles.sectionTitle} style={{ marginTop: "1rem" }}>Gastos</h4>
+          <div className={styles.saleList}>
+            {gastos.map((g) => (
+              <div key={g.id} className={styles.saleRow}>
+                <span className={styles.saleTime}>{g.concepto}</span>
+                <span className={styles.negativo}>
+                  -{formatCurrency(g.monto)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -175,40 +228,13 @@ function TodayPanel({ caja }: { caja: Caja }) {
         <span className={styles.liveBadge}>● EN VIVO</span>
       </div>
 
-      {/* Stats */}
       <div className={styles.statsGrid}>
-        <StatCard
-          label="Ventas brutas"
-          value={formatCurrency(r.totalVentas)}
-          sub={`${r.ordenes} órdenes`}
-          accent="#22c55e"
-        />
-        <StatCard
-          label="Ticket promedio"
-          value={formatCurrency(r.avgTicket)}
-          accent="#3b82f6"
-        />
-        <StatCard
-          label="Efectivo"
-          value={formatCurrency(r.efectivo)}
-          accent="#f59e0b"
-        />
-        <StatCard
-          label="Tarjeta"
-          value={formatCurrency(r.tarjeta)}
-          accent="#8b5cf6"
-        />
-        <StatCard
-          label="Gastos"
-          value={formatCurrency(r.gastos)}
-          accent="#ef4444"
-        />
-        <StatCard
-          label="Total en caja"
-          value={formatCurrency(r.totalGeneral)}
-          sub={`Inicial: ${formatCurrency(caja.montoInicial)}`}
-          accent="#14b8a6"
-        />
+        <StatCard label="Ventas brutas" value={formatCurrency(r.totalVentas)} sub={`${r.ordenes} órdenes`} accent="#22c55e" />
+        <StatCard label="Ticket promedio" value={formatCurrency(r.avgTicket)} accent="#3b82f6" />
+        <StatCard label="Efectivo" value={formatCurrency(r.efectivo)} accent="#f59e0b" />
+        <StatCard label="Tarjeta" value={formatCurrency(r.tarjeta)} accent="#8b5cf6" />
+        <StatCard label="Gastos" value={formatCurrency(r.gastos)} accent="#ef4444" />
+        <StatCard label="Total en caja" value={formatCurrency(r.totalGeneral)} sub={`Inicial: ${formatCurrency(caja.montoInicial)}`} accent="#14b8a6" />
       </div>
 
       <div className={styles.bottomGrid}>
@@ -235,10 +261,7 @@ function TodayPanel({ caja }: { caja: Caja }) {
                     <td>{formatCurrency(item.total)}</td>
                     <td>
                       <span className={styles.shareBadge}>
-                        {r.totalVentas > 0
-                          ? ((item.total / r.totalVentas) * 100).toFixed(1)
-                          : "0"}
-                        %
+                        {r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%
                       </span>
                     </td>
                   </tr>
@@ -256,35 +279,19 @@ function TodayPanel({ caja }: { caja: Caja }) {
           ) : (
             <div className={styles.saleList}>
               {[...caja.ventas]
-                .sort(
-                  (a, b) =>
-                    new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime()
-                )
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .slice(0, 8)
                 .map((sale) => (
                   <div key={sale.id} className={styles.saleRow}>
                     <div className={styles.saleLeft}>
-                      <span className={styles.saleId}>
-                        Venta #{sale.id}
-                      </span>
-                      <span className={styles.saleTime}>
-                        {formatTime(sale.createdAt)}
-                      </span>
+                      <span className={styles.saleId}>Venta #{sale.id}</span>
+                      <span className={styles.saleTime}>{formatTime(sale.createdAt)}</span>
                     </div>
                     <div className={styles.saleRight}>
-                      <span
-                        className={`${styles.payBadge} ${
-                          sale.payment?.toLowerCase() === "efectivo"
-                            ? styles.payEfectivo
-                            : styles.payTarjeta
-                        }`}
-                      >
+                      <span className={`${styles.payBadge} ${sale.payment?.toLowerCase() === "efectivo" ? styles.payEfectivo : styles.payTarjeta}`}>
                         {sale.payment}
                       </span>
-                      <span className={styles.saleTotal}>
-                        {formatCurrency(sale.total)}
-                      </span>
+                      <span className={styles.saleTotal}>{formatCurrency(sale.total)}</span>
                     </div>
                   </div>
                 ))}
@@ -292,6 +299,9 @@ function TodayPanel({ caja }: { caja: Caja }) {
           )}
         </div>
       </div>
+
+      {/* Movimientos y gastos desglosados */}
+      <MovimientosDetalle movimientos={caja.movimientos} gastos={caja.gastos} />
     </div>
   );
 }
@@ -301,7 +311,6 @@ function TodayPanel({ caja }: { caja: Caja }) {
 // ---------------------------------------------------
 function HistoryPanel({ cajas }: { cajas: Caja[] }) {
   const [selected, setSelected] = useState<Caja | null>(null);
-
   const closed = cajas.filter((c) => c.fechaCierre !== null);
 
   return (
@@ -310,44 +319,29 @@ function HistoryPanel({ cajas }: { cajas: Caja[] }) {
       <p className={styles.panelSub}>{closed.length} cierres registrados</p>
 
       <div className={styles.historyGrid}>
-        {/* Lista */}
         <div className={styles.historyList}>
-          {closed.length === 0 && (
-            <p className={styles.empty}>Sin historial</p>
-          )}
+          {closed.length === 0 && <p className={styles.empty}>Sin historial</p>}
           {closed.map((caja) => {
             const r = calcResumen(caja);
             return (
               <div
                 key={caja.id}
-                className={`${styles.historyCard} ${
-                  selected?.id === caja.id ? styles.historyCardActive : ""
-                }`}
-                onClick={() =>
-                  setSelected(selected?.id === caja.id ? null : caja)
-                }
+                className={`${styles.historyCard} ${selected?.id === caja.id ? styles.historyCardActive : ""}`}
+                onClick={() => setSelected(selected?.id === caja.id ? null : caja)}
               >
                 <div className={styles.historyCardTop}>
-                  <span className={styles.historyDate}>
-                    {formatDate(caja.fechaApertura)}
-                  </span>
-                  <span className={styles.historyTotal}>
-                    {formatCurrency(r.totalVentas)}
-                  </span>
+                  <span className={styles.historyDate}>{formatDate(caja.fechaApertura)}</span>
+                  <span className={styles.historyTotal}>{formatCurrency(r.totalVentas)}</span>
                 </div>
                 <div className={styles.historyCardSub}>
                   <span>{r.ordenes} órdenes</span>
-                  <span>
-                    {formatTime(caja.fechaApertura)} →{" "}
-                    {caja.fechaCierre ? formatTime(caja.fechaCierre) : "—"}
-                  </span>
+                  <span>{formatTime(caja.fechaApertura)} → {caja.fechaCierre ? formatTime(caja.fechaCierre) : "—"}</span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Detalle */}
         <div className={styles.historyDetail}>
           {!selected ? (
             <div className={styles.emptyDetail}>
@@ -372,12 +366,9 @@ function CajaDetail({ caja }: { caja: Caja }) {
   return (
     <div className={styles.cajaDetail}>
       <div className={styles.detailHeader}>
-        <h3>
-          Caja #{caja.id} · {formatDate(caja.fechaApertura)}
-        </h3>
+        <h3>Caja #{caja.id} · {formatDate(caja.fechaApertura)}</h3>
         <p className={styles.panelSub}>
-          {formatTime(caja.fechaApertura)} →{" "}
-          {caja.fechaCierre ? formatTime(caja.fechaCierre) : "Abierta"}
+          {formatTime(caja.fechaApertura)} → {caja.fechaCierre ? formatTime(caja.fechaCierre) : "Abierta"}
         </p>
       </div>
 
@@ -390,12 +381,9 @@ function CajaDetail({ caja }: { caja: Caja }) {
         <StatCard label="Ticket prom." value={formatCurrency(r.avgTicket)} accent="#3b82f6" />
       </div>
 
-      {/* Top productos */}
       {r.topItems.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>
-            Top productos
-          </h4>
+          <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Top productos</h4>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -413,10 +401,7 @@ function CajaDetail({ caja }: { caja: Caja }) {
                   <td>{formatCurrency(item.total)}</td>
                   <td>
                     <span className={styles.shareBadge}>
-                      {r.totalVentas > 0
-                        ? ((item.total / r.totalVentas) * 100).toFixed(1)
-                        : "0"}
-                      %
+                      {r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%
                     </span>
                   </td>
                 </tr>
@@ -426,61 +411,8 @@ function CajaDetail({ caja }: { caja: Caja }) {
         </>
       )}
 
-      {/* Gastos */}
-      {caja.gastos.length > 0 && (
-        <>
-          <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>
-            Gastos
-          </h4>
-          <div className={styles.saleList}>
-            {caja.gastos.map((g) => (
-              <div key={g.id} className={styles.saleRow}>
-                <span>{g.concepto}</span>
-                <span className={styles.negativo}>
-                  -{formatCurrency(g.monto)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Movimientos */}
-      {caja.movimientos.length > 0 && (
-        <>
-          <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>
-            Movimientos
-          </h4>
-          <div className={styles.saleList}>
-            {caja.movimientos.map((m) => (
-              <div key={m.id} className={styles.saleRow}>
-                <div className={styles.saleLeft}>
-                  <span
-                    className={`${styles.payBadge} ${
-                      m.tipo === "ENTRADA"
-                        ? styles.payEfectivo
-                        : styles.payTarjeta
-                    }`}
-                  >
-                    {m.tipo}
-                  </span>
-                  <span className={styles.saleTime}>
-                    {m.descripcion ?? "—"}
-                  </span>
-                </div>
-                <span
-                  className={
-                    m.tipo === "ENTRADA" ? styles.positivo : styles.negativo
-                  }
-                >
-                  {m.tipo === "ENTRADA" ? "+" : "-"}
-                  {formatCurrency(m.monto)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {/* Movimientos y gastos desglosados */}
+      <MovimientosDetalle movimientos={caja.movimientos} gastos={caja.gastos} />
     </div>
   );
 }
@@ -523,39 +455,20 @@ export default function SalesReportPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Reportes de Ventas</h1>
-          <p className={styles.subtitle}>
-            Rendimiento de ventas, gastos y movimientos de caja
-          </p>
+          <p className={styles.subtitle}>Rendimiento de ventas, gastos y movimientos de caja</p>
         </div>
-
         <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${tab === "today" ? styles.tabActive : ""}`}
-            onClick={() => setTab("today")}
-          >
-            Hoy
-          </button>
-          <button
-            className={`${styles.tab} ${tab === "history" ? styles.tabActive : ""}`}
-            onClick={() => setTab("history")}
-          >
-            Historial
-          </button>
+          <button className={`${styles.tab} ${tab === "today" ? styles.tabActive : ""}`} onClick={() => setTab("today")}>Hoy</button>
+          <button className={`${styles.tab} ${tab === "history" ? styles.tabActive : ""}`} onClick={() => setTab("history")}>Historial</button>
         </div>
       </div>
 
-      {/* Content */}
       {tab === "today" ? (
-        cajaActual ? (
-          <TodayPanel caja={cajaActual} />
-        ) : (
-          <div className={styles.noCaja}>
-            <p>No hay caja abierta en este momento.</p>
-          </div>
+        cajaActual ? <TodayPanel caja={cajaActual} /> : (
+          <div className={styles.noCaja}><p>No hay caja abierta en este momento.</p></div>
         )
       ) : (
         <HistoryPanel cajas={historico} />
