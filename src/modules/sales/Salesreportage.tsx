@@ -24,6 +24,25 @@ type Sale = {
   items: SaleItem[];
 };
 
+type OrderItem = {
+  id: number;
+  productId: number | null;
+  customName: string | null;
+  quantity: number;
+  priceUnit: number;
+  subtotal: number;
+  product?: { name: string };
+};
+
+type CancelledOrder = {
+  id: number;
+  total: number;
+  createdAt: string;
+  clientName: string | null;
+  type: string;
+  items: OrderItem[];
+};
+
 type Movimiento = {
   id: number;
   tipo: "ENTRADA" | "SALIDA";
@@ -211,9 +230,78 @@ function MovimientosDetalle({ movimientos, gastos }: {
 }
 
 // ---------------------------------------------------
+// Órdenes Canceladas (reutilizable)
+// ---------------------------------------------------
+function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
+  if (orders.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: "14px",
+        padding: "1.25rem",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        marginTop: "1.5rem",
+        border: "1px solid #fee2e2",
+      }}
+    >
+      <h3 className={styles.sectionTitle} style={{ color: "#ef4444" }}>
+        Órdenes canceladas ({orders.length})
+      </h3>
+      <div className={styles.saleList}>
+        {[...orders]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .map((order) => (
+            <div key={order.id} className={styles.saleRow} style={{ alignItems: "flex-start", gap: "0.5rem" }}>
+              <div className={styles.saleLeft}>
+                <span className={styles.saleId}>Orden #{order.id}</span>
+                <span className={styles.saleTime}>{formatTime(order.createdAt)}</span>
+                {order.clientName && (
+                  <span className={styles.saleTime}>{order.clientName}</span>
+                )}
+                {/* Items de la orden */}
+                <div style={{ marginTop: "0.2rem" }}>
+                  {order.items.map((item) => (
+                    <span
+                      key={item.id}
+                      className={styles.saleTime}
+                      style={{ display: "block", fontSize: "0.72rem" }}
+                    >
+                      {item.quantity}x {item.product?.name ?? item.customName ?? `Item #${item.id}`}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.saleRight}>
+                <span
+                  style={{
+                    fontSize: "0.7rem",
+                    fontWeight: 600,
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    background: "#fee2e2",
+                    color: "#ef4444",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  CANCELADA
+                </span>
+                <span className={styles.saleTotal} style={{ color: "#ef4444" }}>
+                  {formatCurrency(order.total)}
+                </span>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
 // Today Panel
 // ---------------------------------------------------
-function TodayPanel({ caja }: { caja: Caja }) {
+function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: CancelledOrder[] }) {
   const r = calcResumen(caja);
 
   return (
@@ -301,6 +389,9 @@ function TodayPanel({ caja }: { caja: Caja }) {
         </div>
       </div>
 
+      {/* Órdenes canceladas del día */}
+      <CancelledOrdersSection orders={cancelledOrders} />
+
       {/* Movimientos y gastos desglosados */}
       <MovimientosDetalle movimientos={caja.movimientos} gastos={caja.gastos} />
     </div>
@@ -310,7 +401,10 @@ function TodayPanel({ caja }: { caja: Caja }) {
 // ---------------------------------------------------
 // History Panel
 // ---------------------------------------------------
-function HistoryPanel({ cajas }: { cajas: Caja[] }) {
+function HistoryPanel({ cajas, cancelledByCaja }: {
+  cajas: Caja[];
+  cancelledByCaja: Record<number, CancelledOrder[]>;
+}) {
   const [selected, setSelected] = useState<Caja | null>(null);
   const closed = cajas.filter((c) => c.fechaCierre !== null);
 
@@ -350,7 +444,10 @@ function HistoryPanel({ cajas }: { cajas: Caja[] }) {
               <p>Selecciona una caja para ver el detalle</p>
             </div>
           ) : (
-            <CajaDetail caja={selected} />
+            <CajaDetail
+              caja={selected}
+              cancelledOrders={cancelledByCaja[selected.id] ?? []}
+            />
           )}
         </div>
       </div>
@@ -361,7 +458,7 @@ function HistoryPanel({ cajas }: { cajas: Caja[] }) {
 // ---------------------------------------------------
 // Caja Detail
 // ---------------------------------------------------
-function CajaDetail({ caja }: { caja: Caja }) {
+function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: CancelledOrder[] }) {
   const r = calcResumen(caja);
   const [printing, setPrinting] = useState(false);
   const [printMsg, setPrintMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -467,6 +564,9 @@ function CajaDetail({ caja }: { caja: Caja }) {
         </>
       )}
 
+      {/* Órdenes canceladas de esta caja */}
+      <CancelledOrdersSection orders={cancelledOrders} />
+
       {/* Movimientos y gastos desglosados */}
       <MovimientosDetalle movimientos={caja.movimientos} gastos={caja.gastos} />
     </div>
@@ -479,6 +579,8 @@ function CajaDetail({ caja }: { caja: Caja }) {
 export default function SalesReportPage() {
   const [cajaActual, setCajaActual] = useState<Caja | null>(null);
   const [historico, setHistorico] = useState<Caja[]>([]);
+  const [cancelledToday, setCancelledToday] = useState<CancelledOrder[]>([]);
+  const [cancelledByCaja, setCancelledByCaja] = useState<Record<number, CancelledOrder[]>>({});
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"today" | "history">("today");
 
@@ -488,8 +590,39 @@ export default function SalesReportPage() {
         apiRequest("/caja/actual").catch(() => null),
         apiRequest("/caja").catch(() => []),
       ]);
+
       setCajaActual(actual);
       setHistorico(all);
+
+      // Canceladas de hoy (rango desde inicio del día hasta ahora)
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date();
+
+      const cancelled: CancelledOrder[] = await apiRequest(
+        `/orders?status=CANCELLED&from=${todayStart.toISOString()}&to=${todayEnd.toISOString()}`
+      ).catch(() => []);
+
+      setCancelledToday(cancelled);
+
+      // Canceladas por caja (usando fechaApertura y fechaCierre como rango)
+      const closedCajas: Caja[] = (all as Caja[]).filter((c) => c.fechaCierre !== null);
+
+      const cancelledPerCaja: Record<number, CancelledOrder[]> = {};
+
+      await Promise.all(
+        closedCajas.map(async (caja) => {
+          const from = new Date(caja.fechaApertura).toISOString();
+          const to   = new Date(caja.fechaCierre!).toISOString();
+          const orders: CancelledOrder[] = await apiRequest(
+            `/orders?status=CANCELLED&from=${from}&to=${to}`
+          ).catch(() => []);
+          cancelledPerCaja[caja.id] = orders;
+        })
+      );
+
+      setCancelledByCaja(cancelledPerCaja);
+
     } finally {
       setLoading(false);
     }
@@ -523,11 +656,13 @@ export default function SalesReportPage() {
       </div>
 
       {tab === "today" ? (
-        cajaActual ? <TodayPanel caja={cajaActual} /> : (
+        cajaActual ? (
+          <TodayPanel caja={cajaActual} cancelledOrders={cancelledToday} />
+        ) : (
           <div className={styles.noCaja}><p>No hay caja abierta en este momento.</p></div>
         )
       ) : (
-        <HistoryPanel cajas={historico} />
+        <HistoryPanel cajas={historico} cancelledByCaja={cancelledByCaja} />
       )}
     </div>
   );

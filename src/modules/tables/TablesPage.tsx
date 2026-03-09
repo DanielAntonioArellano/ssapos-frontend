@@ -20,12 +20,100 @@ type Order = {
   }[];
 };
 
+// ---------------------------------------------------
+// Modal de cancelación con concepto + contraseña admin
+// ---------------------------------------------------
+interface CancelModalProps {
+  orderId: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function CancelOrderModal({ orderId, onClose, onSuccess }: CancelModalProps) {
+  const [concepto, setConcepto] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  async function handleCancel() {
+    if (!concepto.trim()) {
+      setError("Ingresa el motivo de cancelación");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Ingresa la contraseña de administrador");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      await apiRequest(`/orders/${orderId}/cancel`, {
+        method: "POST",
+        body: JSON.stringify({ concepto, adminPassword: password }),
+      });
+      toast(`Orden #${orderId} cancelada`, "success");
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message ?? "Error al cancelar la orden");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalBox}>
+        <h3 className={styles.modalTitle}>Cancelar Orden #{orderId}</h3>
+        <p className={styles.modalSubtitle}>
+          Ingresa el motivo y la contraseña de un administrador para confirmar.
+        </p>
+
+        {error && <div className={styles.errorMsg}>{error}</div>}
+
+        <input
+          className={styles.modalInput}
+          type="text"
+          placeholder="Motivo de cancelación"
+          value={concepto}
+          onChange={(e) => setConcepto(e.target.value)}
+          autoFocus
+        />
+
+        <input
+          className={styles.modalInput}
+          type="password"
+          placeholder="Contraseña de administrador"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleCancel()}
+          style={{ marginTop: "0.75rem" }}
+        />
+
+        <div className={styles.modalActions}>
+          <button className={styles.secondaryBtn} onClick={onClose} disabled={loading}>
+            Cerrar
+          </button>
+          <button className={styles.deleteBtn} onClick={handleCancel} disabled={loading}>
+            {loading ? "Cancelando..." : "Confirmar cancelación"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Main Page
+// ---------------------------------------------------
 export default function TablesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
+  const [cancelOrderId, setCancelOrderId] = useState<number | null>(null);
 
   const fetchOrders = async () => {
     const caja = await apiRequest("/caja/actual");
@@ -38,11 +126,11 @@ export default function TablesPage() {
   useEffect(() => {
     fetchOrders();
     const interval = setInterval(() => {
-      if (checkoutOrder) return;
+      if (checkoutOrder || cancelOrderId) return;
       fetchOrders();
     }, 5000);
     return () => clearInterval(interval);
-  }, [checkoutOrder]);
+  }, [checkoutOrder, cancelOrderId]);
 
   const handleReprint = async (id: number) => {
     try {
@@ -116,6 +204,14 @@ export default function TablesPage() {
                             Cobrar
                           </button>
                         )}
+                        {order.status !== "COMPLETED" && (
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => setCancelOrderId(order.id)}
+                          >
+                            Cancelar
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -176,6 +272,17 @@ export default function TablesPage() {
           onClose={() => setCheckoutOrder(null)}
           onSuccess={() => {
             setCheckoutOrder(null);
+            fetchOrders();
+          }}
+        />
+      )}
+
+      {cancelOrderId && (
+        <CancelOrderModal
+          orderId={cancelOrderId}
+          onClose={() => setCancelOrderId(null)}
+          onSuccess={() => {
+            setCancelOrderId(null);
             fetchOrders();
           }}
         />

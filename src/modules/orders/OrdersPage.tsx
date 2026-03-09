@@ -39,21 +39,26 @@ type CheckoutOrder = {
 };
 
 // ---------------------------------------------------
-// Modal de contraseña admin para eliminar
+// Modal de cancelación con concepto + contraseña admin
 // ---------------------------------------------------
-interface DeleteModalProps {
+interface CancelModalProps {
   orderId: number;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-function DeleteOrderModal({ orderId, onClose, onSuccess }: DeleteModalProps) {
+function CancelOrderModal({ orderId, onClose, onSuccess }: CancelModalProps) {
+  const [concepto, setConcepto] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  async function handleDelete() {
+  async function handleCancel() {
+    if (!concepto.trim()) {
+      setError("Ingresa el motivo de cancelación");
+      return;
+    }
     if (!password.trim()) {
       setError("Ingresa la contraseña de administrador");
       return;
@@ -62,14 +67,14 @@ function DeleteOrderModal({ orderId, onClose, onSuccess }: DeleteModalProps) {
     try {
       setLoading(true);
       setError(null);
-      await apiRequest(`/orders/${orderId}`, {
-        method: "DELETE",
-        body: JSON.stringify({ adminPassword: password }),
+      await apiRequest(`/orders/${orderId}/cancel`, {
+        method: "POST",
+        body: JSON.stringify({ concepto, adminPassword: password }),
       });
-      toast(`Orden #${orderId} eliminada`, "success");
+      toast(`Orden #${orderId} cancelada`, "success");
       onSuccess();
     } catch (err: any) {
-      setError(err.message ?? "Error al eliminar la orden");
+      setError(err.message ?? "Error al cancelar la orden");
     } finally {
       setLoading(false);
     }
@@ -78,12 +83,21 @@ function DeleteOrderModal({ orderId, onClose, onSuccess }: DeleteModalProps) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalBox}>
-        <h3 className={styles.modalTitle}>Eliminar Orden #{orderId}</h3>
+        <h3 className={styles.modalTitle}>Cancelar Orden #{orderId}</h3>
         <p className={styles.modalSubtitle}>
-          Ingresa la contraseña de un administrador para confirmar.
+          Ingresa el motivo y la contraseña de un administrador para confirmar.
         </p>
 
         {error && <div className={styles.errorMsg}>{error}</div>}
+
+        <input
+          className={styles.modalInput}
+          type="text"
+          placeholder="Motivo de cancelación"
+          value={concepto}
+          onChange={(e) => setConcepto(e.target.value)}
+          autoFocus
+        />
 
         <input
           className={styles.modalInput}
@@ -91,8 +105,8 @@ function DeleteOrderModal({ orderId, onClose, onSuccess }: DeleteModalProps) {
           placeholder="Contraseña de administrador"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleDelete()}
-          autoFocus
+          onKeyDown={(e) => e.key === "Enter" && handleCancel()}
+          style={{ marginTop: "0.75rem" }}
         />
 
         <div className={styles.modalActions}>
@@ -101,14 +115,14 @@ function DeleteOrderModal({ orderId, onClose, onSuccess }: DeleteModalProps) {
             onClick={onClose}
             disabled={loading}
           >
-            Cancelar
+            Cerrar
           </button>
           <button
             className={styles.deleteBtn}
-            onClick={handleDelete}
+            onClick={handleCancel}
             disabled={loading}
           >
-            {loading ? "Eliminando..." : "Eliminar"}
+            {loading ? "Cancelando..." : "Confirmar cancelación"}
           </button>
         </div>
       </div>
@@ -130,7 +144,7 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [checkoutOrder, setCheckoutOrder] = useState<CheckoutOrder | null>(null);
   const [search, setSearch] = useState("");
-  const [deleteOrderId, setDeleteOrderId] = useState<number | null>(null);
+  const [cancelOrderId, setCancelOrderId] = useState<number | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -150,12 +164,11 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchOrders();
     const interval = setInterval(() => {
-      // No recargar si hay un modal abierto
-      if (checkoutOrder || deleteOrderId) return;
+      if (checkoutOrder || cancelOrderId) return;
       fetchOrders();
     }, 20000);
     return () => clearInterval(interval);
-  }, [checkoutOrder, deleteOrderId]);
+  }, [checkoutOrder, cancelOrderId]);
 
   const changeStatus = async (id: number, status: string) => {
     try {
@@ -232,7 +245,7 @@ export default function OrdersPage() {
             can={can}
             navigate={navigate}
             onStartPrep={(id: number) => changeStatus(id, "PREPARATION")}
-            onDelete={(id: number) => setDeleteOrderId(id)}
+            onCancel={(id: number) => setCancelOrderId(id)}
             onReprint={async (id: number) => {
               try {
                 await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
@@ -249,7 +262,7 @@ export default function OrdersPage() {
             navigate={navigate}
             onSendDelivery={(id: number) => changeStatus(id, "DELIVERY")}
             onBackOrdered={(id: number) => changeStatus(id, "ORDERED")}
-            onDelete={(id: number) => setDeleteOrderId(id)}
+            onCancel={(id: number) => setCancelOrderId(id)}
           />
           <OrderColumn
             title="Delivery"
@@ -257,7 +270,7 @@ export default function OrdersPage() {
             can={can}
             navigate={navigate}
             onCheckout={openCheckout}
-            onDelete={(id: number) => setDeleteOrderId(id)}
+            onCancel={(id: number) => setCancelOrderId(id)}
             onReprint={async (id: number) => {
               try {
                 await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
@@ -297,12 +310,12 @@ export default function OrdersPage() {
         />
       )}
 
-      {deleteOrderId && (
-        <DeleteOrderModal
-          orderId={deleteOrderId}
-          onClose={() => setDeleteOrderId(null)}
+      {cancelOrderId && (
+        <CancelOrderModal
+          orderId={cancelOrderId}
+          onClose={() => setCancelOrderId(null)}
           onSuccess={() => {
-            setDeleteOrderId(null);
+            setCancelOrderId(null);
             fetchOrders();
           }}
         />
@@ -320,7 +333,7 @@ function OrderColumn({
   onSendDelivery,
   onBackOrdered,
   onCheckout,
-  onDelete,
+  onCancel,
   onReprint,
 }: any) {
   return (
@@ -340,7 +353,7 @@ function OrderColumn({
             onSendDelivery={onSendDelivery}
             onBackOrdered={onBackOrdered}
             onCheckout={onCheckout}
-            onDelete={onDelete}
+            onCancel={onCancel}
             onReprint={onReprint}
           />
         ))}
@@ -357,7 +370,7 @@ function OrderCard({
   onSendDelivery,
   onBackOrdered,
   onCheckout,
-  onDelete,
+  onCancel,
   onReprint,
 }: any) {
   return (
@@ -440,12 +453,12 @@ function OrderCard({
           </button>
         )}
 
-        {order.status !== "COMPLETED" && onDelete && (
+        {order.status !== "COMPLETED" && onCancel && (
           <button
             className={styles.deleteBtn}
-            onClick={() => onDelete(order.id)}
+            onClick={() => onCancel(order.id)}
           >
-            Eliminar
+            Cancelar
           </button>
         )}
 
