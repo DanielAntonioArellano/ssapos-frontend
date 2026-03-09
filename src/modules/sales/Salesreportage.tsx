@@ -153,19 +153,25 @@ function MovimientosDetalle({ movimientos, gastos }: {
   if (movimientos.length === 0 && gastos.length === 0) return null;
 
   return (
-    <div style={{ marginTop: "1.5rem" }}>
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: "14px",
+        padding: "1.25rem",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        marginTop: "1.5rem",
+      }}
+    >
+      <h3 className={styles.sectionTitle}>Movimientos y Gastos</h3>
+
       {entradas.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle}>Entradas</h4>
+          <p className={styles.saleTime} style={{ marginBottom: "0.4rem" }}>Entradas</p>
           <div className={styles.saleList}>
             {entradas.map((m) => (
               <div key={m.id} className={styles.saleRow}>
-                <span className={styles.saleTime}>
-                  {m.motivo ?? m.descripcion ?? "Sin concepto"}
-                </span>
-                <span className={styles.positivo}>
-                  +{formatCurrency(m.monto)}
-                </span>
+                <span>{m.motivo ?? m.descripcion ?? "Sin concepto"}</span>
+                <span className={styles.positivo}>+{formatCurrency(m.monto)}</span>
               </div>
             ))}
           </div>
@@ -174,16 +180,12 @@ function MovimientosDetalle({ movimientos, gastos }: {
 
       {salidas.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle} style={{ marginTop: "1rem" }}>Salidas</h4>
+          <p className={styles.saleTime} style={{ marginTop: "0.75rem", marginBottom: "0.4rem" }}>Salidas</p>
           <div className={styles.saleList}>
             {salidas.map((m) => (
               <div key={m.id} className={styles.saleRow}>
-                <span className={styles.saleTime}>
-                  {m.motivo ?? m.descripcion ?? "Sin concepto"}
-                </span>
-                <span className={styles.negativo}>
-                  -{formatCurrency(m.monto)}
-                </span>
+                <span>{m.motivo ?? m.descripcion ?? "Sin concepto"}</span>
+                <span className={styles.negativo}>-{formatCurrency(m.monto)}</span>
               </div>
             ))}
           </div>
@@ -192,14 +194,12 @@ function MovimientosDetalle({ movimientos, gastos }: {
 
       {gastos.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle} style={{ marginTop: "1rem" }}>Gastos</h4>
+          <p className={styles.saleTime} style={{ marginTop: "0.75rem", marginBottom: "0.4rem" }}>Gastos</p>
           <div className={styles.saleList}>
             {gastos.map((g) => (
               <div key={g.id} className={styles.saleRow}>
-                <span className={styles.saleTime}>{g.concepto}</span>
-                <span className={styles.negativo}>
-                  -{formatCurrency(g.monto)}
-                </span>
+                <span>{g.concepto}</span>
+                <span className={styles.negativo}>-{formatCurrency(g.monto)}</span>
               </div>
             ))}
           </div>
