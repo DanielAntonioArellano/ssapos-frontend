@@ -577,6 +577,8 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
         <StatCard label="Efectivo" value={formatCurrency(r.efectivo)} accent="#f59e0b" />
         <StatCard label="Tarjeta" value={formatCurrency(r.tarjeta)} accent="#8b5cf6" />
         <StatCard label="Gastos" value={formatCurrency(r.gastos)} accent="#ef4444" />
+        <StatCard label="Entradas" value={formatCurrency(r.entradas)} accent="#10b981" />
+        <StatCard label="Salidas" value={formatCurrency(r.salidas)} accent="#f97316" />
         <StatCard label="Total final" value={formatCurrency(r.totalGeneral)} accent="#14b8a6" />
         <StatCard label="Ticket prom." value={formatCurrency(r.avgTicket)} accent="#3b82f6" />
       </div>
