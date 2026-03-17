@@ -22,6 +22,10 @@ type Sale = {
   payment: string;
   createdAt: string;
   items: SaleItem[];
+  // Datos de la orden asociada (si los hay)
+  clientName?: string | null;
+  clientPhone?: string | null;
+  type?: string | null;
 };
 
 type OrderItem = {
@@ -40,7 +44,7 @@ type CancelledOrder = {
   createdAt: string;
   clientName: string | null;
   type: string;
-  cancelConcepto: string | null; // ← motivo de cancelación
+  cancelConcepto: string | null;
   items: OrderItem[];
 };
 
@@ -162,6 +166,85 @@ function StatCard({ label, value, sub, accent }: {
 }
 
 // ---------------------------------------------------
+// Ventas con detalle expandible
+// ---------------------------------------------------
+function VentasDetalle({ ventas }: { ventas: Sale[] }) {
+  const [expanded, setExpanded] = useState<number | null>(null);
+
+  if (ventas.length === 0) return null;
+
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: "14px",
+      padding: "1.25rem",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+      marginTop: "1.5rem",
+    }}>
+      <h3 className={styles.sectionTitle}>Detalle de ventas ({ventas.length})</h3>
+      <div className={styles.saleList}>
+        {[...ventas]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .map((sale) => (
+            <div key={sale.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+              {/* Fila principal clickeable */}
+              <div
+                className={styles.saleRow}
+                style={{ borderBottom: "none", cursor: "pointer" }}
+                onClick={() => setExpanded(expanded === sale.id ? null : sale.id)}
+              >
+                <div className={styles.saleLeft}>
+                  <span className={styles.saleId}>Venta #{sale.id}</span>
+                  <span className={styles.saleTime}>{formatTime(sale.createdAt)}</span>
+                  {sale.clientName && (
+                    <span className={styles.saleTime}>{sale.clientName}</span>
+                  )}
+                  {sale.clientPhone && (
+                    <span className={styles.saleTime}>📞 {sale.clientPhone}</span>
+                  )}
+                </div>
+                <div className={styles.saleRight}>
+                  <span className={`${styles.payBadge} ${sale.payment?.toLowerCase() === "efectivo" ? styles.payEfectivo : styles.payTarjeta}`}>
+                    {sale.payment}
+                  </span>
+                  <span className={styles.saleTotal}>{formatCurrency(sale.total)}</span>
+                  <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>
+                    {expanded === sale.id ? "▲" : "▼"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Detalle expandido */}
+              {expanded === sale.id && (
+                <div style={{
+                  padding: "0.5rem 0 0.75rem 0.5rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.25rem",
+                }}>
+                  {(sale.items ?? []).map((item) => (
+                    <div key={item.id} style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: "0.8rem",
+                      color: "#475569",
+                    }}>
+                      <span>
+                        {item.quantity}x {item.product?.name ?? item.customName ?? `Item #${item.id}`}
+                      </span>
+                      <span>{formatCurrency(item.subtotal)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
 // Movimientos detallados (reutilizable)
 // ---------------------------------------------------
 function MovimientosDetalle({ movimientos, gastos }: {
@@ -174,15 +257,13 @@ function MovimientosDetalle({ movimientos, gastos }: {
   if (movimientos.length === 0 && gastos.length === 0) return null;
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "14px",
-        padding: "1.25rem",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-        marginTop: "1.5rem",
-      }}
-    >
+    <div style={{
+      background: "#fff",
+      borderRadius: "14px",
+      padding: "1.25rem",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+      marginTop: "1.5rem",
+    }}>
       <h3 className={styles.sectionTitle}>Movimientos y Gastos</h3>
 
       {entradas.length > 0 && (
@@ -237,16 +318,14 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
   if (orders.length === 0) return null;
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "14px",
-        padding: "1.25rem",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-        marginTop: "1.5rem",
-        border: "1px solid #fee2e2",
-      }}
-    >
+    <div style={{
+      background: "#fff",
+      borderRadius: "14px",
+      padding: "1.25rem",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+      marginTop: "1.5rem",
+      border: "1px solid #fee2e2",
+    }}>
       <h3 className={styles.sectionTitle} style={{ color: "#ef4444" }}>
         Órdenes canceladas ({orders.length})
       </h3>
@@ -258,48 +337,22 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
               <div className={styles.saleLeft}>
                 <span className={styles.saleId}>Orden #{order.id}</span>
                 <span className={styles.saleTime}>{formatTime(order.createdAt)}</span>
-                {order.clientName && (
-                  <span className={styles.saleTime}>{order.clientName}</span>
-                )}
-                {/* Motivo de cancelación */}
+                {order.clientName && <span className={styles.saleTime}>{order.clientName}</span>}
                 {order.cancelConcepto && (
-                  <span
-                    className={styles.saleTime}
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "#ef4444",
-                      fontStyle: "italic",
-                      marginTop: "0.15rem",
-                    }}
-                  >
+                  <span className={styles.saleTime} style={{ fontSize: "0.75rem", color: "#ef4444", fontStyle: "italic" }}>
                     Motivo: {order.cancelConcepto}
                   </span>
                 )}
-                {/* Items de la orden */}
                 <div style={{ marginTop: "0.2rem" }}>
                   {order.items.map((item) => (
-                    <span
-                      key={item.id}
-                      className={styles.saleTime}
-                      style={{ display: "block", fontSize: "0.72rem" }}
-                    >
+                    <span key={item.id} className={styles.saleTime} style={{ display: "block", fontSize: "0.72rem" }}>
                       {item.quantity}x {item.product?.name ?? item.customName ?? `Item #${item.id}`}
                     </span>
                   ))}
                 </div>
               </div>
               <div className={styles.saleRight}>
-                <span
-                  style={{
-                    fontSize: "0.7rem",
-                    fontWeight: 600,
-                    padding: "2px 8px",
-                    borderRadius: "999px",
-                    background: "#fee2e2",
-                    color: "#ef4444",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <span style={{ fontSize: "0.7rem", fontWeight: 600, padding: "2px 8px", borderRadius: "999px", background: "#fee2e2", color: "#ef4444", whiteSpace: "nowrap" }}>
                   CANCELADA
                 </span>
                 <span className={styles.saleTotal} style={{ color: "#ef4444" }}>
@@ -342,7 +395,6 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
       </div>
 
       <div className={styles.bottomGrid}>
-        {/* Top productos */}
         <div className={styles.topItems}>
           <h3 className={styles.sectionTitle}>Top productos</h3>
           {r.topItems.length === 0 ? (
@@ -350,12 +402,7 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           ) : (
             <table className={styles.table}>
               <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cant.</th>
-                  <th>Total</th>
-                  <th>%</th>
-                </tr>
+                <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
               </thead>
               <tbody>
                 {r.topItems.map((item) => (
@@ -363,11 +410,7 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
                     <td>{item.name}</td>
                     <td>{item.qty}</td>
                     <td>{formatCurrency(item.total)}</td>
-                    <td>
-                      <span className={styles.shareBadge}>
-                        {r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%
-                      </span>
-                    </td>
+                    <td><span className={styles.shareBadge}>{r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -375,7 +418,6 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           )}
         </div>
 
-        {/* Ventas recientes */}
         <div className={styles.recentSales}>
           <h3 className={styles.sectionTitle}>Ventas recientes</h3>
           {caja.ventas.length === 0 ? (
@@ -403,6 +445,9 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           )}
         </div>
       </div>
+
+      {/* Detalle completo de ventas */}
+      <VentasDetalle ventas={caja.ventas} />
 
       {/* Órdenes canceladas del día */}
       <CancelledOrdersSection orders={cancelledOrders} />
@@ -459,10 +504,7 @@ function HistoryPanel({ cajas, cancelledByCaja }: {
               <p>Selecciona una caja para ver el detalle</p>
             </div>
           ) : (
-            <CajaDetail
-              caja={selected}
-              cancelledOrders={cancelledByCaja[selected.id] ?? []}
-            />
+            <CajaDetail caja={selected} cancelledOrders={cancelledByCaja[selected.id] ?? []} />
           )}
         </div>
       </div>
@@ -495,7 +537,6 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
   return (
     <div className={styles.cajaDetail}>
 
-      {/* Header con botón reimprimir */}
       <div className={styles.detailHeader} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
         <div>
           <h3>Caja #{caja.id} · {formatDate(caja.fechaApertura)}</h3>
@@ -510,18 +551,13 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
             onClick={handlePrint}
             disabled={printing}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem",
+              display: "flex", alignItems: "center", gap: "0.4rem",
               padding: "0.5rem 1rem",
               background: printing ? "#e2e8f0" : "#0f172a",
               color: printing ? "#94a3b8" : "#fff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "0.8rem",
-              fontWeight: 600,
+              border: "none", borderRadius: "8px",
+              fontSize: "0.8rem", fontWeight: 600,
               cursor: printing ? "not-allowed" : "pointer",
-              transition: "background 0.2s",
               whiteSpace: "nowrap",
             }}
           >
@@ -529,11 +565,7 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
             {printing ? "Imprimiendo..." : "Reimprimir corte"}
           </button>
           {printMsg && (
-            <span style={{
-              fontSize: "0.75rem",
-              color: printMsg.ok ? "#16a34a" : "#ef4444",
-              fontWeight: 500,
-            }}>
+            <span style={{ fontSize: "0.75rem", color: printMsg.ok ? "#16a34a" : "#ef4444", fontWeight: 500 }}>
               {printMsg.ok ? "✓" : "✗"} {printMsg.text}
             </span>
           )}
@@ -554,12 +586,7 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Top productos</h4>
           <table className={styles.table}>
             <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Cant.</th>
-                <th>Total</th>
-                <th>%</th>
-              </tr>
+              <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
             </thead>
             <tbody>
               {r.topItems.map((item) => (
@@ -567,17 +594,16 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
                   <td>{item.name}</td>
                   <td>{item.qty}</td>
                   <td>{formatCurrency(item.total)}</td>
-                  <td>
-                    <span className={styles.shareBadge}>
-                      {r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%
-                    </span>
-                  </td>
+                  <td><span className={styles.shareBadge}>{r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%</span></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </>
       )}
+
+      {/* Detalle completo de ventas */}
+      <VentasDetalle ventas={caja.ventas} />
 
       {/* Órdenes canceladas de esta caja */}
       <CancelledOrdersSection orders={cancelledOrders} />
