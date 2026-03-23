@@ -699,4 +699,26 @@
   gap: 6px;
   padding: 4px 0;
 }
+/* Categorías deslizables */
+.categoriesScroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.categoriesScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.categoriesScroll .tab,
+.categoriesScroll .activeTab {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 

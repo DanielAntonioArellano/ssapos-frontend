@@ -92,17 +92,22 @@ export default function PosPage() {
       return;
     }
 
-    setCart(
-      order.items.map((item: any) => ({
-        id: item.productId ?? undefined,
-        name: item.product?.name,
-        customName: item.customName ?? undefined,
-        priceSell: item.priceUnit,
-        categoryId: item.product?.categoryId,
-        quantity: item.quantity,
-      }))
-    );
+    // Al cargar orden existente, cada item con quantity > 1 se expande en entradas individuales
+    const expandedItems: CartItem[] = [];
+    for (const item of order.items) {
+      for (let i = 0; i < item.quantity; i++) {
+        expandedItems.push({
+          id: item.productId ?? undefined,
+          name: item.product?.name,
+          customName: item.customName ?? undefined,
+          priceSell: item.priceUnit,
+          categoryId: item.product?.categoryId,
+          quantity: 1,
+        });
+      }
+    }
 
+    setCart(expandedItems);
     setOrderType(order.type);
     setTableNumber(order.tableNumber);
     setClientName(order.clientName ?? "");
@@ -116,16 +121,9 @@ export default function PosPage() {
     ? products.filter((p) => p.categoryId === selectedCategory)
     : products;
 
+  // Siempre agrega entrada individual — nunca agrupa
   function addToCart(product: Product) {
-    setCart((prev) => {
-      const existing = prev.find((p) => p.id === product.id);
-      if (existing) {
-        return prev.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
+    setCart((prev) => [...prev, { ...product, quantity: 1 }]);
   }
 
   function addCustomItem() {
@@ -135,7 +133,7 @@ export default function PosPage() {
     }
     setCart((prev) => [
       ...prev,
-      { customName, priceSell: Number(customPrice), quantity: customQty },
+      { customName, priceSell: Number(customPrice), quantity: 1 },
     ]);
     setCustomName("");
     setCustomPrice("");
@@ -143,31 +141,20 @@ export default function PosPage() {
     setShowCustomForm(false);
   }
 
-  function increase(index: number) {
-    setCart((prev) =>
-      prev.map((item, i) => i === index ? { ...item, quantity: item.quantity + 1 } : item)
-    );
-  }
-
-  function decrease(index: number) {
-    setCart((prev) =>
-      prev
-        .map((item, i) => i === index ? { ...item, quantity: item.quantity - 1 } : item)
-        .filter((item) => item.quantity > 0)
-    );
+  function removeItem(index: number) {
+    setCart((prev) => prev.filter((_, i) => i !== index));
   }
 
   const subtotal = cart.reduce((sum, item) => sum + item.priceSell * item.quantity, 0);
   const discountNum = parseFloat(discount) || 0;
   const total = Math.max(0, subtotal - discountNum);
 
-  // Distribuye el descuento proporcionalmente entre los items
   function buildItemsWithDiscount() {
     if (discountNum <= 0 || subtotal === 0) {
       return cart.map((item) => ({
         productId: item.id ?? null,
         customName: item.customName ?? null,
-        quantity: item.quantity,
+        quantity: 1,
         priceUnit: item.priceSell,
       }));
     }
@@ -176,7 +163,7 @@ export default function PosPage() {
     return cart.map((item) => ({
       productId: item.id ?? null,
       customName: item.customName ?? null,
-      quantity: item.quantity,
+      quantity: 1,
       priceUnit: parseFloat((item.priceSell * ratio).toFixed(4)),
     }));
   }
@@ -299,7 +286,8 @@ export default function PosPage() {
             </button>
           </div>
 
-          <div className={styles.categoriesTabs}>
+          {/* Categorías deslizables */}
+          <div className={styles.categoriesScroll}>
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -355,7 +343,6 @@ export default function PosPage() {
             </div>
           )}
 
-          {/* Acordeón datos del cliente */}
           <button
             className={styles.accordionBtn}
             onClick={() => setShowClientForm(!showClientForm)}
@@ -402,12 +389,6 @@ export default function PosPage() {
                 value={customPrice}
                 onChange={(e) => setCustomPrice(e.target.value)}
               />
-              <input
-                type="number"
-                min={1}
-                value={customQty}
-                onChange={(e) => setCustomQty(Number(e.target.value))}
-              />
               <button onClick={addCustomItem}>Agregar</button>
             </div>
           )}
@@ -421,14 +402,16 @@ export default function PosPage() {
                     {item.customName && <span className={styles.customBadge}>CUSTOM</span>}
                   </strong>
                 </div>
-                <div className={styles.itemControls}>
-                  <button onClick={() => decrease(index)}>-</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => increase(index)}>+</button>
-                </div>
                 <div className={styles.itemPrice}>
-                  ${(item.priceSell * item.quantity).toFixed(2)}
+                  ${item.priceSell.toFixed(2)}
                 </div>
+                <button
+                  className={styles.removeBtn}
+                  onClick={() => removeItem(index)}
+                  title="Eliminar"
+                >
+                  ✕
+                </button>
               </div>
             ))}
           </div>
@@ -439,7 +422,6 @@ export default function PosPage() {
               <strong>${subtotal.toFixed(2)}</strong>
             </div>
 
-            {/* Descuento */}
             <div className={styles.summaryRow}>
               <button
                 className={styles.discountBtn}
@@ -470,7 +452,7 @@ export default function PosPage() {
             </div>
 
             <div className={styles.metaInfo}>
-              {cart.length} productos • {cart.reduce((s, i) => s + i.quantity, 0)} items
+              {cart.length} item{cart.length !== 1 ? "s" : ""}
             </div>
             <div className={styles.actions}>
               <button
