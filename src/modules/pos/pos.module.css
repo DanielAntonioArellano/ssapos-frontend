@@ -2,18 +2,22 @@
   display: flex;
   gap: 20px;
   height: 100%;
+  min-width: 0; /* evita overflow del flex padre */
 }
 
 .productsSection {
-  flex: 2.2;
+  flex: 1;          /* toma el espacio restante */
+  min-width: 0;     /* clave: evita que empuje al orderSection */
   background: white;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  overflow: hidden;
 }
 
 .orderSection {
-  flex: 1;
+  width: 320px;        /* ancho fijo, no se mueve */
+  flex-shrink: 0;      /* nunca se encoge */
   background: white;
   border-radius: 16px;
   padding: 20px;
@@ -432,21 +436,6 @@
     opacity: 1;
   }
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { 
-    transform: scale(0.96);
-    opacity: 0;
-  }
-  to { 
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
 .modal h2 {
   margin: 0 0 20px 0;
@@ -490,15 +479,6 @@
   margin-top: 24px;
 }
 
-.primaryBtn {
-  background: #111827;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
 /* -------------------------- */
 /* Custom Product UX Upgrade */
 /* -------------------------- */
@@ -556,9 +536,6 @@
   margin-left: 6px;
 }
 
-.primaryBtn:hover {
-  background: #1f2937;
-}
 .orderItem {
   transition: all 0.15s ease;
   animation: fadeInItem 0.2s ease;
@@ -574,32 +551,13 @@
     transform: translateY(0);
   }
 }
-.secondaryBtn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #E5E7EB;
-  background: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
+
 .metaInfo {
   font-size: 12px;
   color: #6B7280;
   margin-top: 4px;
 }
 
-.secondaryBtn:hover {
-  background: #F3F4F6;
-}
-.secondaryBtn {
-  background: #f3f4f6;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-}
 .deliverySection {
   display: flex;
   flex-direction: column;
@@ -637,6 +595,7 @@
   outline: none;
   border-color: #0f766e;
 }
+
 /* Descuento */
 .discountBtn {
   background: none;
@@ -672,6 +631,7 @@
 .discountForm input:focus {
   border-color: #0F4C4C;
 }
+
 /* Acordeón datos del cliente */
 .accordionBtn {
   width: 100%;
@@ -699,7 +659,10 @@
   gap: 6px;
   padding: 4px 0;
 }
-/* Categorías deslizables */
+
+/* ---------------------------------------- */
+/* Categorías — carrusel horizontal fijo    */
+/* ---------------------------------------- */
 .categoriesScroll {
   display: flex;
   gap: 8px;
@@ -707,8 +670,11 @@
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
   margin-bottom: 16px;
+  /* Contenido no desborda al padre */
+  min-width: 0;
+  width: 100%;
 }
 
 .categoriesScroll::-webkit-scrollbar {
@@ -718,7 +684,154 @@
 .categoriesScroll .tab,
 .categoriesScroll .activeTab {
   scroll-snap-align: start;
-  flex-shrink: 0;
+  flex-shrink: 0;   /* cada botón mantiene su tamaño natural */
   white-space: nowrap;
 }
 
+/* Propina */
+.tipSection {
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tipLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.tipButtons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tipBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background: #F3F4F6;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.tipBtn:hover {
+  background: #E5E7EB;
+}
+
+.tipBtnActive {
+  background: #0F4C4C;
+  color: white;
+  border-color: #0F4C4C;
+}
+
+.tipCustomRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.tipCustomInput {
+  width: 100px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  font-size: 13px;
+}
+
+.tipCustomInput:focus {
+  outline: none;
+  border-color: #0F4C4C;
+}
+
+/* Modal box (para cancelar/eliminar) */
+.modalBox {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modalSubtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: #0F4C4C;
+}
+
+.errorMsg {
+  background: #FEE2E2;
+  color: #DC2626;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.deleteBtn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #DC2626;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: #B91C1C;
+}
+
+.checkoutItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.checkoutRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #374151;
+}
+
+.checkoutTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  margin: 8px 0;
+}
