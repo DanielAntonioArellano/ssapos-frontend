@@ -22,9 +22,10 @@ type Sale = {
   payment: string;
   createdAt: string;
   items: SaleItem[];
-  order?: {                   // ← datos del cliente desde la orden
+  order?: {
     clientName: string | null;
     clientPhone: string | null;
+    clientNotes: string | null;
     type: string;
   } | null;
 };
@@ -167,41 +168,99 @@ function StatCard({ label, value, sub, accent }: {
 }
 
 // ---------------------------------------------------
-// Fila de venta con cliente
+// Order type badge
+// ---------------------------------------------------
+const ORDER_TYPE_LABEL: Record<string, string> = {
+  DELIVERY: "🛵 Delivery",
+  TAKEAWAY: "🥡 Para llevar",
+  DINE_IN: "🍽️ Mesa",
+};
+
+// ---------------------------------------------------
+// Fila de venta con cliente (expandible)
 // ---------------------------------------------------
 function SaleRow({ sale }: { sale: Sale }) {
-  const clientName = sale.order?.clientName;
+  const [expanded, setExpanded] = useState(false);
+
+  const clientName  = sale.order?.clientName;
   const clientPhone = sale.order?.clientPhone;
-  const isDineIn = sale.order?.type === "DINE_IN";
+  const clientNotes = sale.order?.clientNotes;
+  const orderType   = sale.order?.type;
+  const isDineIn    = orderType === "DINE_IN";
+  const hasClient   = !isDineIn && (clientName || clientPhone || clientNotes);
 
   return (
-    <div className={styles.saleRow} style={{ alignItems: "flex-start" }}>
-      <div className={styles.saleLeft}>
-        <span className={styles.saleId}>Venta #{sale.id}</span>
-        <span className={styles.saleTime}>{formatTime(sale.createdAt)}</span>
-        {!isDineIn && clientName && (
-          <span className={styles.saleTime} style={{ fontSize: "0.75rem" }}>
-            👤 {clientName}
+    <div
+      className={styles.saleRow}
+      style={{ alignItems: "flex-start", flexDirection: "column", cursor: hasClient ? "pointer" : "default" }}
+      onClick={() => hasClient && setExpanded((e) => !e)}
+    >
+      {/* Fila principal */}
+      <div style={{ display: "flex", width: "100%", alignItems: "flex-start" }}>
+        <div className={styles.saleLeft} style={{ flex: 1 }}>
+          <span className={styles.saleId}>Venta #{sale.id}</span>
+          <span className={styles.saleTime}>{formatTime(sale.createdAt)}</span>
+          {orderType && (
+            <span className={styles.saleTime} style={{ fontSize: "0.72rem", marginTop: "0.1rem" }}>
+              {ORDER_TYPE_LABEL[orderType] ?? orderType}
+            </span>
+          )}
+          {!isDineIn && clientName && (
+            <span className={styles.saleTime} style={{ fontSize: "0.75rem" }}>
+              👤 {clientName}
+            </span>
+          )}
+        </div>
+        <div className={styles.saleRight}>
+          <span className={`${styles.payBadge} ${sale.payment?.toLowerCase() === "efectivo" ? styles.payEfectivo : styles.payTarjeta}`}>
+            {sale.payment}
           </span>
-        )}
-        {!isDineIn && clientPhone && (
-          <span className={styles.saleTime} style={{ fontSize: "0.75rem" }}>
-            📞 {clientPhone}
-          </span>
-        )}
+          <span className={styles.saleTotal}>{formatCurrency(sale.total)}</span>
+          {hasClient && (
+            <span style={{ fontSize: "0.65rem", color: "#94a3b8", marginTop: "0.25rem" }}>
+              {expanded ? "▲ ocultar" : "▼ ver más"}
+            </span>
+          )}
+        </div>
       </div>
-      <div className={styles.saleRight}>
-        <span className={`${styles.payBadge} ${sale.payment?.toLowerCase() === "efectivo" ? styles.payEfectivo : styles.payTarjeta}`}>
-          {sale.payment}
-        </span>
-        <span className={styles.saleTotal}>{formatCurrency(sale.total)}</span>
-      </div>
+
+      {/* Detalle expandido del cliente */}
+      {expanded && hasClient && (
+        <div style={{
+          marginTop: "0.5rem",
+          paddingTop: "0.5rem",
+          borderTop: "1px dashed #e2e8f0",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.2rem",
+        }}>
+          {clientPhone && (
+            <span style={{ fontSize: "0.78rem", color: "#475569" }}>
+              📞 {clientPhone}
+            </span>
+          )}
+          {clientNotes && (
+            <span style={{ fontSize: "0.78rem", color: "#475569", fontStyle: "italic" }}>
+              📝 {clientNotes}
+            </span>
+          )}
+          {/* Items de la venta */}
+          <div style={{ marginTop: "0.35rem" }}>
+            {sale.items.map((item) => (
+              <span key={item.id} style={{ display: "block", fontSize: "0.72rem", color: "#64748b" }}>
+                {item.quantity}x {item.product?.name ?? item.customName ?? `Item #${item.id}`} — {formatCurrency(item.subtotal)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ---------------------------------------------------
-// Movimientos detallados (reutilizable)
+// Movimientos detallados
 // ---------------------------------------------------
 function MovimientosDetalle({ movimientos, gastos }: {
   movimientos: Movimiento[];
@@ -213,15 +272,10 @@ function MovimientosDetalle({ movimientos, gastos }: {
   if (movimientos.length === 0 && gastos.length === 0) return null;
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "14px",
-        padding: "1.25rem",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-        marginTop: "1.5rem",
-      }}
-    >
+    <div style={{
+      background: "#fff", borderRadius: "14px", padding: "1.25rem",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginTop: "1.5rem",
+    }}>
       <h3 className={styles.sectionTitle}>Movimientos y Gastos</h3>
 
       {entradas.length > 0 && (
@@ -270,22 +324,17 @@ function MovimientosDetalle({ movimientos, gastos }: {
 }
 
 // ---------------------------------------------------
-// Órdenes Canceladas (reutilizable)
+// Órdenes Canceladas
 // ---------------------------------------------------
 function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
   if (orders.length === 0) return null;
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "14px",
-        padding: "1.25rem",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-        marginTop: "1.5rem",
-        border: "1px solid #fee2e2",
-      }}
-    >
+    <div style={{
+      background: "#fff", borderRadius: "14px", padding: "1.25rem",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginTop: "1.5rem",
+      border: "1px solid #fee2e2",
+    }}>
       <h3 className={styles.sectionTitle} style={{ color: "#ef4444" }}>
         Órdenes canceladas ({orders.length})
       </h3>
@@ -297,9 +346,7 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
               <div className={styles.saleLeft}>
                 <span className={styles.saleId}>Orden #{order.id}</span>
                 <span className={styles.saleTime}>{formatTime(order.createdAt)}</span>
-                {order.clientName && (
-                  <span className={styles.saleTime}>{order.clientName}</span>
-                )}
+                {order.clientName && <span className={styles.saleTime}>{order.clientName}</span>}
                 {order.cancelConcepto && (
                   <span className={styles.saleTime} style={{ fontSize: "0.75rem", color: "#ef4444", fontStyle: "italic", marginTop: "0.15rem" }}>
                     Motivo: {order.cancelConcepto}
@@ -323,6 +370,270 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
               </div>
             </div>
           ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Reports Panel — Semanal / Mensual
+// ---------------------------------------------------
+type ReportPeriod = "weekly" | "monthly";
+
+function buildPeriods(cajas: Caja[], mode: ReportPeriod) {
+  // Agrupa cajas cerradas por semana ISO o mes
+  const closed = cajas.filter((c) => c.fechaCierre !== null);
+
+  const buckets: Record<string, { label: string; cajas: Caja[] }> = {};
+
+  for (const caja of closed) {
+    const date = new Date(caja.fechaApertura);
+    let key: string;
+    let label: string;
+
+    if (mode === "monthly") {
+      key   = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      label = date.toLocaleDateString("es-MX", { month: "long", year: "numeric" });
+    } else {
+      // Semana ISO (lunes como inicio)
+      const day  = date.getDay() === 0 ? 6 : date.getDay() - 1; // 0=lun
+      const mon  = new Date(date);
+      mon.setDate(date.getDate() - day);
+      const sun  = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+      key   = mon.toISOString().slice(0, 10);
+      label = `${formatDate(mon.toISOString())} – ${formatDate(sun.toISOString())}`;
+    }
+
+    if (!buckets[key]) buckets[key] = { label, cajas: [] };
+    buckets[key].cajas.push(caja);
+  }
+
+  // Ordenar de más reciente a más antiguo
+  return Object.entries(buckets)
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([key, val]) => ({ key, ...val }));
+}
+
+function calcPeriodStats(cajas: Caja[]) {
+  let totalVentas = 0, efectivo = 0, tarjeta = 0, gastos = 0, ordenes = 0;
+  const itemMap: Record<string, { name: string; qty: number; total: number }> = {};
+
+  for (const caja of cajas) {
+    const r = calcResumen(caja);
+    totalVentas += r.totalVentas;
+    efectivo    += r.efectivo;
+    tarjeta     += r.tarjeta;
+    gastos      += r.gastos;
+    ordenes     += r.ordenes;
+
+    for (const item of r.topItems) {
+      if (!itemMap[item.name]) itemMap[item.name] = { name: item.name, qty: 0, total: 0 };
+      itemMap[item.name].qty   += item.qty;
+      itemMap[item.name].total += item.total;
+    }
+  }
+
+  const topItems = Object.values(itemMap)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+
+  const avgTicket = ordenes ? totalVentas / ordenes : 0;
+
+  return { totalVentas, efectivo, tarjeta, gastos, ordenes, avgTicket, topItems };
+}
+
+function ReportsPanel({ cajas }: { cajas: Caja[] }) {
+  const [mode, setMode] = useState<ReportPeriod>("weekly");
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const periods = buildPeriods(cajas, mode);
+  const selectedPeriod = periods.find((p) => p.key === selectedKey) ?? null;
+  const selectedStats  = selectedPeriod ? calcPeriodStats(selectedPeriod.cajas) : null;
+
+  // Comparativa: período actual vs anterior
+  const currentIdx  = periods.findIndex((p) => p.key === selectedKey);
+  const prevPeriod  = currentIdx >= 0 && currentIdx + 1 < periods.length ? periods[currentIdx + 1] : null;
+  const prevStats   = prevPeriod ? calcPeriodStats(prevPeriod.cajas) : null;
+
+  function diffPct(curr: number, prev: number) {
+    if (!prev) return null;
+    const pct = ((curr - prev) / prev) * 100;
+    return pct;
+  }
+
+  function DiffBadge({ curr, prev }: { curr: number; prev: number }) {
+    const pct = diffPct(curr, prev);
+    if (pct === null) return null;
+    const up = pct >= 0;
+    return (
+      <span style={{
+        fontSize: "0.7rem", fontWeight: 700,
+        color: up ? "#16a34a" : "#ef4444",
+        background: up ? "#dcfce7" : "#fee2e2",
+        borderRadius: "999px", padding: "2px 7px", marginLeft: "0.4rem",
+      }}>
+        {up ? "▲" : "▼"} {Math.abs(pct).toFixed(1)}%
+      </span>
+    );
+  }
+
+  return (
+    <div className={styles.historyPanel}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
+        <div>
+          <h2 className={styles.panelTitle}>Reportes</h2>
+          <p className={styles.panelSub}>{periods.length} períodos registrados</p>
+        </div>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${mode === "weekly" ? styles.tabActive : ""}`}
+            onClick={() => { setMode("weekly"); setSelectedKey(null); }}
+          >
+            Semanal
+          </button>
+          <button
+            className={`${styles.tab} ${mode === "monthly" ? styles.tabActive : ""}`}
+            onClick={() => { setMode("monthly"); setSelectedKey(null); }}
+          >
+            Mensual
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.historyGrid}>
+        {/* Lista de períodos */}
+        <div className={styles.historyList}>
+          {periods.length === 0 && <p className={styles.empty}>Sin datos registrados</p>}
+          {periods.map((period) => {
+            const s = calcPeriodStats(period.cajas);
+            return (
+              <div
+                key={period.key}
+                className={`${styles.historyCard} ${selectedKey === period.key ? styles.historyCardActive : ""}`}
+                onClick={() => setSelectedKey(selectedKey === period.key ? null : period.key)}
+              >
+                <div className={styles.historyCardTop}>
+                  <span className={styles.historyDate} style={{ fontSize: "0.8rem" }}>{period.label}</span>
+                  <span className={styles.historyTotal}>{formatCurrency(s.totalVentas)}</span>
+                </div>
+                <div className={styles.historyCardSub}>
+                  <span>{s.ordenes} órdenes · {period.cajas.length} cajas</span>
+                  <span>Prom. {formatCurrency(s.avgTicket)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Detalle del período */}
+        <div className={styles.historyDetail}>
+          {!selectedPeriod || !selectedStats ? (
+            <div className={styles.emptyDetail}>
+              <span>←</span>
+              <p>Selecciona un período para ver el reporte</p>
+            </div>
+          ) : (
+            <div className={styles.cajaDetail}>
+              <h3 style={{ marginBottom: "0.25rem" }}>{selectedPeriod.label}</h3>
+              <p className={styles.panelSub} style={{ marginBottom: "1rem" }}>
+                {selectedPeriod.cajas.length} cajas · {selectedStats.ordenes} órdenes
+              </p>
+
+              {/* Stats con comparativa */}
+              <div className={styles.detailStats}>
+                <div className={styles.statCard} style={{ "--accent": "#22c55e" } as any}>
+                  <span className={styles.statLabel}>Total ventas</span>
+                  <span className={styles.statValue}>
+                    {formatCurrency(selectedStats.totalVentas)}
+                    {prevStats && <DiffBadge curr={selectedStats.totalVentas} prev={prevStats.totalVentas} />}
+                  </span>
+                  {prevStats && (
+                    <span className={styles.statSub}>Período ant.: {formatCurrency(prevStats.totalVentas)}</span>
+                  )}
+                </div>
+                <div className={styles.statCard} style={{ "--accent": "#f59e0b" } as any}>
+                  <span className={styles.statLabel}>Efectivo</span>
+                  <span className={styles.statValue}>
+                    {formatCurrency(selectedStats.efectivo)}
+                    {prevStats && <DiffBadge curr={selectedStats.efectivo} prev={prevStats.efectivo} />}
+                  </span>
+                </div>
+                <div className={styles.statCard} style={{ "--accent": "#8b5cf6" } as any}>
+                  <span className={styles.statLabel}>Tarjeta</span>
+                  <span className={styles.statValue}>
+                    {formatCurrency(selectedStats.tarjeta)}
+                    {prevStats && <DiffBadge curr={selectedStats.tarjeta} prev={prevStats.tarjeta} />}
+                  </span>
+                </div>
+                <div className={styles.statCard} style={{ "--accent": "#ef4444" } as any}>
+                  <span className={styles.statLabel}>Gastos</span>
+                  <span className={styles.statValue}>{formatCurrency(selectedStats.gastos)}</span>
+                </div>
+                <div className={styles.statCard} style={{ "--accent": "#3b82f6" } as any}>
+                  <span className={styles.statLabel}>Ticket promedio</span>
+                  <span className={styles.statValue}>
+                    {formatCurrency(selectedStats.avgTicket)}
+                    {prevStats && <DiffBadge curr={selectedStats.avgTicket} prev={prevStats.avgTicket} />}
+                  </span>
+                </div>
+              </div>
+
+              {/* Top productos */}
+              {selectedStats.topItems.length > 0 && (
+                <>
+                  <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Top productos del período</h4>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
+                    </thead>
+                    <tbody>
+                      {selectedStats.topItems.map((item) => (
+                        <tr key={item.name}>
+                          <td>{item.name}</td>
+                          <td>{item.qty}</td>
+                          <td>{formatCurrency(item.total)}</td>
+                          <td>
+                            <span className={styles.shareBadge}>
+                              {selectedStats.totalVentas > 0
+                                ? ((item.total / selectedStats.totalVentas) * 100).toFixed(1)
+                                : "0"}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
+
+              {/* Desglose por caja */}
+              <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Cajas del período</h4>
+              <div className={styles.saleList}>
+                {[...selectedPeriod.cajas]
+                  .sort((a, b) => new Date(b.fechaApertura).getTime() - new Date(a.fechaApertura).getTime())
+                  .map((caja) => {
+                    const r = calcResumen(caja);
+                    return (
+                      <div key={caja.id} className={styles.saleRow}>
+                        <div className={styles.saleLeft}>
+                          <span className={styles.saleId}>Caja #{caja.id}</span>
+                          <span className={styles.saleTime}>
+                            {formatDate(caja.fechaApertura)} · {formatTime(caja.fechaApertura)} → {caja.fechaCierre ? formatTime(caja.fechaCierre) : "—"}
+                          </span>
+                          {caja.user && <span className={styles.saleTime}>{caja.user.name}</span>}
+                        </div>
+                        <div className={styles.saleRight}>
+                          <span className={styles.saleTotal}>{formatCurrency(r.totalVentas)}</span>
+                          <span className={styles.saleTime}>{r.ordenes} órdenes</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -357,7 +668,6 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
       </div>
 
       <div className={styles.bottomGrid}>
-        {/* Top productos */}
         <div className={styles.topItems}>
           <h3 className={styles.sectionTitle}>Top productos</h3>
           {r.topItems.length === 0 ? (
@@ -365,12 +675,7 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           ) : (
             <table className={styles.table}>
               <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cant.</th>
-                  <th>Total</th>
-                  <th>%</th>
-                </tr>
+                <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
               </thead>
               <tbody>
                 {r.topItems.map((item) => (
@@ -390,7 +695,6 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           )}
         </div>
 
-        {/* Ventas recientes */}
         <div className={styles.recentSales}>
           <h3 className={styles.sectionTitle}>Ventas recientes</h3>
           {caja.ventas.length === 0 ? (
@@ -564,7 +868,6 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
         </>
       )}
 
-      {/* Ventas con cliente */}
       {caja.ventas.length > 0 && (
         <>
           <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Ventas</h4>
@@ -588,12 +891,12 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
 // Main Page
 // ---------------------------------------------------
 export default function SalesReportPage() {
-  const [cajaActual, setCajaActual] = useState<Caja | null>(null);
-  const [historico, setHistorico] = useState<Caja[]>([]);
-  const [cancelledToday, setCancelledToday] = useState<CancelledOrder[]>([]);
-  const [cancelledByCaja, setCancelledByCaja] = useState<Record<number, CancelledOrder[]>>({});
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"today" | "history">("today");
+  const [cajaActual, setCajaActual]       = useState<Caja | null>(null);
+  const [historico, setHistorico]         = useState<Caja[]>([]);
+  const [cancelledToday, setCancelledToday]     = useState<CancelledOrder[]>([]);
+  const [cancelledByCaja, setCancelledByCaja]   = useState<Record<number, CancelledOrder[]>>({});
+  const [loading, setLoading]             = useState(true);
+  const [tab, setTab]                     = useState<"today" | "history" | "reports">("today");
 
   const fetchData = async () => {
     try {
@@ -657,8 +960,9 @@ export default function SalesReportPage() {
           <p className={styles.subtitle}>Rendimiento de ventas, gastos y movimientos de caja</p>
         </div>
         <div className={styles.tabs}>
-          <button className={`${styles.tab} ${tab === "today" ? styles.tabActive : ""}`} onClick={() => setTab("today")}>Hoy</button>
+          <button className={`${styles.tab} ${tab === "today"   ? styles.tabActive : ""}`} onClick={() => setTab("today")}>Hoy</button>
           <button className={`${styles.tab} ${tab === "history" ? styles.tabActive : ""}`} onClick={() => setTab("history")}>Historial</button>
+          <button className={`${styles.tab} ${tab === "reports" ? styles.tabActive : ""}`} onClick={() => setTab("reports")}>Reportes</button>
         </div>
       </div>
 
@@ -668,8 +972,10 @@ export default function SalesReportPage() {
         ) : (
           <div className={styles.noCaja}><p>No hay caja abierta en este momento.</p></div>
         )
-      ) : (
+      ) : tab === "history" ? (
         <HistoryPanel cajas={historico} cancelledByCaja={cancelledByCaja} />
+      ) : (
+        <ReportsPanel cajas={historico} />
       )}
     </div>
   );
