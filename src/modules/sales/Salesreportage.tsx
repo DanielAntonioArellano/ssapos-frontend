@@ -250,7 +250,7 @@ function MovimientosDetalle({ movimientos, gastos }: { movimientos: Movimiento[]
       )}
       {salidas.length > 0 && (
         <>
-          <p className={styles.saleTime} style={{ marginTop: "0.75rem", marginBottom: "0.4rem" }}>Salidas</p>
+          <p className={styles.saleTime} style={{ marginTop: "0.75rem", marginBottom: "0.4rem" }}>Sueldos</p>
           <div className={styles.saleList}>
             {salidas.map((m) => (
               <div key={m.id} className={styles.saleRow}>
@@ -581,7 +581,7 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
                   </span>
                 </div>
                 <div className={styles.statCard} style={{ "--accent": "#dc2626" } as any}>
-                  <span className={styles.statLabel}>Salidas</span>
+                  <span className={styles.statLabel}>Sueldos</span>
                   <span className={styles.statValue}>
                     -{formatCurrency(selectedStats.salidas)}
                     {prevStats && <DiffBadge curr={selectedStats.salidas} prev={prevStats.salidas} />}
