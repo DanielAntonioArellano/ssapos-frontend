@@ -11,15 +11,13 @@
 }
 
 /* ===== GRID ===== */
-
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
 
 /* ===== TABLE CARD ===== */
-
 .tableCard {
   background: white;
   border-radius: 20px;
@@ -27,131 +25,237 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  transition: 0.2s ease;
+  gap: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .tableCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+}
+
+.tableCardFinished {
+  opacity: 0.75;
+  background: #f9fafb;
 }
 
 /* Header */
-
 .tableHeader {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .tableIndicator {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #22c55e; /* ocupada */
-}
-
-.tableHeader h3 {
-  flex: 1;
-  margin: 0;
-  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .tableTotal {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 15px;
   color: #0f766e;
 }
 
-/* ===== Orders inside table ===== */
-
+/* ===== Orders list ===== */
 .ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== Order Card ===== */
+.orderCard {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-left: 4px solid #e2e8f0;
+  transition: background 0.15s ease;
+}
+
+.orderCard:hover {
+  background: #f1f5f9;
+}
+
+/* Top row */
+.orderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.orderId {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Items detail (expandible) */
+.itemsDetail {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Bottom row */
+.orderBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.orderTotal {
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+/* ===== Buttons ===== */
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.primaryBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #0f766e;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.primaryBtn:hover {
+  background: #0d6460;
+}
+
+.secondaryBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.secondaryBtn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.deleteBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.deleteBtn:hover {
+  background: #fee2e2;
+}
+
+/* ===== Finished section ===== */
+.finishedSection {
+  margin-top: 40px;
+}
+
+/* ===== Modal ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modalBox {
+  background: white;
+  border-radius: 18px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.orderCard {
-  background: #f8fafb;
-  border-radius: 14px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: 0.15s ease;
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
 }
 
-.orderCard:hover {
-  background: #eef2f3;
-}
-
-/* Top row */
-
-.orderTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.orderId {
+.modalSubtitle {
   font-size: 13px;
-  font-weight: 500;
+  color: #64748b;
+  margin: 0;
 }
 
-/* Badge */
-
-.statusBadge {
-  background: #e0f2fe;
-  color: #0369a1;
-  padding: 4px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-/* Bottom row */
-
-.orderBottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.orderTotal {
-  font-weight: 600;
+.modalInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
 }
 
-/* Buttons */
+.modalInput:focus {
+  border-color: #0f766e;
+}
 
-.actions {
+.modalActions {
   display: flex;
-  gap: 6px;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
 }
 
-.primaryBtn {
-  padding: 6px 10px;
-  border-radius: 20px;
-  border: none;
-  background: #0f766e;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.primaryBtn:hover {
-  background: #136f6f;
-}
-
-.secondaryBtn {
-  padding: 6px 10px;
-  border-radius: 20px;
-  border: none;
-  background: #e5e7eb;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.secondaryBtn:hover {
-  background: #d1d5db;
+.errorMsg {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
 }
