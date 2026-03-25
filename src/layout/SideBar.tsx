@@ -31,6 +31,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { label: "Inventario",      icon: Package,         path: "/inventory", show: can.verInventario },
     { label: "Reportes",        icon: BookOpenCheck,   path: "/reportes",  show: can.verReportes },
     { label: "Usuarios",        icon: Users,           path: "/users",     show: can.verUsuarios },
+    { label: "Clientes",        icon: Users,           path: "/Customers", show: can.verClientes },
     { label: "Impresoras",      icon: Printer,         path: "/printers",  show: can.verUsuarios },
   ];
 

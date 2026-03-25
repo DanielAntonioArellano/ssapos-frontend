@@ -13,6 +13,7 @@ import UsersPage from "../modules/users/UsersPage";
 import ProductsPage from "../modules/products/Productspage";
 import PrintersPage from "../modules/printers/PrintersPage";
 import SuperAdminPage from "../modules/superadmin/SuperAdminPage";
+import CustomersPage from "../modules/users/CustomersPage";
 
 export default function AppRouter() {
   return (
@@ -51,6 +52,8 @@ export default function AppRouter() {
         <Route path="/products/new" element={<ProductsPage />} />
         <Route path="/products/edit/:id" element={<ProductsPage />} />
         <Route path="/printers" element={<PrintersPage />} />
+        <Route path="/Customers" element={<CustomersPage />} />
+
       </Route>
 
       {/* Catch-all */}
