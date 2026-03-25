@@ -663,7 +663,7 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
         <StatCard label="Tarjeta"         value={formatCurrency(r.tarjeta)}     accent="#8b5cf6" />
         <StatCard label="Gastos"          value={formatCurrency(r.gastos)}      accent="#ef4444" />
         <StatCard label="Entradas"        value={`+${formatCurrency(r.entradas)}`} accent="#16a34a" />
-        <StatCard label="Salidas"         value={`-${formatCurrency(r.salidas)}`}  accent="#dc2626" />
+        <StatCard label="Sueldos"         value={`-${formatCurrency(r.salidas)}`}  accent="#dc2626" />
         <StatCard label="Total en caja"   value={formatCurrency(r.totalGeneral)} sub={`Inicial: ${formatCurrency(caja.montoInicial)}`} accent="#14b8a6" />
       </div>
 
@@ -818,7 +818,7 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
         <StatCard label="Tarjeta"      value={formatCurrency(r.tarjeta)}      accent="#8b5cf6" />
         <StatCard label="Gastos"       value={formatCurrency(r.gastos)}       accent="#ef4444" />
         <StatCard label="Entradas"     value={`+${formatCurrency(r.entradas)}`} accent="#16a34a" />
-        <StatCard label="Salidas"      value={`-${formatCurrency(r.salidas)}`}  accent="#dc2626" />
+        <StatCard label="Sueldos"      value={`-${formatCurrency(r.salidas)}`}  accent="#dc2626" />
         <StatCard label="Total final"  value={formatCurrency(r.totalGeneral)} accent="#14b8a6" />
         <StatCard label="Ticket prom." value={formatCurrency(r.avgTicket)}    accent="#3b82f6" />
       </div>
