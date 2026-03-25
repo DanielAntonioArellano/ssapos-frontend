@@ -152,7 +152,7 @@ export default function OrdersPage() {
       const caja = await apiRequest("/caja/actual");
       const desde = caja?.fechaApertura ?? new Date().toISOString();
       const hasta = new Date().toISOString();
-      const activas = await apiRequest(`/orders?from=${desde}&to=${hasta}`);
+      const activas = await apiRequest(`/orders?from=${desde}&to=${hasta}&type=DELIVERY`);
       setOrders(activas);
     } catch (err: any) {
       setError(err.message || "Error cargando órdenes");
