@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../services/api";
-import styles from "./sales.module.css"
+import styles from "./sales.module.css";
 import { Printer } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Cell,
+} from "recharts";
 
 // ---------------------------------------------------
 // Types
@@ -87,16 +91,13 @@ function formatCurrency(n: number) {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+    day: "2-digit", month: "short", year: "numeric",
   });
 }
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
+    hour: "2-digit", minute: "2-digit",
   });
 }
 
@@ -111,21 +112,12 @@ function calcResumen(caja: Caja) {
   const efectivo = caja.ventas
     .filter((v) => v.payment?.toLowerCase() === "efectivo")
     .reduce((s, v) => s + v.total, 0);
-
   const tarjeta = caja.ventas
     .filter((v) => v.payment?.toLowerCase() === "tarjeta")
     .reduce((s, v) => s + v.total, 0);
-
-  const gastos = caja.gastos.reduce((s, g) => s + g.monto, 0);
-
-  const entradas = caja.movimientos
-    .filter((m) => m.tipo === "ENTRADA")
-    .reduce((s, m) => s + m.monto, 0);
-
-  const salidas = caja.movimientos
-    .filter((m) => m.tipo === "SALIDA")
-    .reduce((s, m) => s + m.monto, 0);
-
+  const gastos   = caja.gastos.reduce((s, g) => s + g.monto, 0);
+  const entradas = caja.movimientos.filter((m) => m.tipo === "ENTRADA").reduce((s, m) => s + m.monto, 0);
+  const salidas  = caja.movimientos.filter((m) => m.tipo === "SALIDA").reduce((s, m) => s + m.monto, 0);
   const totalVentas = efectivo + tarjeta;
   const totalGeneral =
     caja.totalGeneral ??
@@ -140,9 +132,7 @@ function calcResumen(caja: Caja) {
       itemMap[name].total += item.subtotal;
     }
   }
-  const topItems = Object.values(itemMap)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
+  const topItems = Object.values(itemMap).sort((a, b) => b.total - a.total).slice(0, 5);
 
   return {
     efectivo, tarjeta, gastos, entradas, salidas,
@@ -167,9 +157,6 @@ function StatCard({ label, value, sub, accent }: {
   );
 }
 
-// ---------------------------------------------------
-// Order type badge
-// ---------------------------------------------------
 const ORDER_TYPE_LABEL: Record<string, string> = {
   DELIVERY: "🛵 Delivery",
   TAKEAWAY: "🥡 Para llevar",
@@ -177,11 +164,10 @@ const ORDER_TYPE_LABEL: Record<string, string> = {
 };
 
 // ---------------------------------------------------
-// Fila de venta con cliente (expandible)
+// Fila de venta expandible
 // ---------------------------------------------------
 function SaleRow({ sale }: { sale: Sale }) {
   const [expanded, setExpanded] = useState(false);
-
   const clientName  = sale.order?.clientName;
   const clientPhone = sale.order?.clientPhone;
   const clientNotes = sale.order?.clientNotes;
@@ -195,7 +181,6 @@ function SaleRow({ sale }: { sale: Sale }) {
       style={{ alignItems: "flex-start", flexDirection: "column", cursor: hasClient ? "pointer" : "default" }}
       onClick={() => hasClient && setExpanded((e) => !e)}
     >
-      {/* Fila principal */}
       <div style={{ display: "flex", width: "100%", alignItems: "flex-start" }}>
         <div className={styles.saleLeft} style={{ flex: 1 }}>
           <span className={styles.saleId}>Venta #{sale.id}</span>
@@ -206,9 +191,7 @@ function SaleRow({ sale }: { sale: Sale }) {
             </span>
           )}
           {!isDineIn && clientName && (
-            <span className={styles.saleTime} style={{ fontSize: "0.75rem" }}>
-              👤 {clientName}
-            </span>
+            <span className={styles.saleTime} style={{ fontSize: "0.75rem" }}>👤 {clientName}</span>
           )}
         </div>
         <div className={styles.saleRight}>
@@ -224,28 +207,10 @@ function SaleRow({ sale }: { sale: Sale }) {
         </div>
       </div>
 
-      {/* Detalle expandido del cliente */}
       {expanded && hasClient && (
-        <div style={{
-          marginTop: "0.5rem",
-          paddingTop: "0.5rem",
-          borderTop: "1px dashed #e2e8f0",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.2rem",
-        }}>
-          {clientPhone && (
-            <span style={{ fontSize: "0.78rem", color: "#475569" }}>
-              📞 {clientPhone}
-            </span>
-          )}
-          {clientNotes && (
-            <span style={{ fontSize: "0.78rem", color: "#475569", fontStyle: "italic" }}>
-              📝 {clientNotes}
-            </span>
-          )}
-          {/* Items de la venta */}
+        <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px dashed #e2e8f0", width: "100%", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+          {clientPhone && <span style={{ fontSize: "0.78rem", color: "#475569" }}>📞 {clientPhone}</span>}
+          {clientNotes && <span style={{ fontSize: "0.78rem", color: "#475569", fontStyle: "italic" }}>📝 {clientNotes}</span>}
           <div style={{ marginTop: "0.35rem" }}>
             {sale.items.map((item) => (
               <span key={item.id} style={{ display: "block", fontSize: "0.72rem", color: "#64748b" }}>
@@ -262,22 +227,14 @@ function SaleRow({ sale }: { sale: Sale }) {
 // ---------------------------------------------------
 // Movimientos detallados
 // ---------------------------------------------------
-function MovimientosDetalle({ movimientos, gastos }: {
-  movimientos: Movimiento[];
-  gastos: Gasto[];
-}) {
+function MovimientosDetalle({ movimientos, gastos }: { movimientos: Movimiento[]; gastos: Gasto[] }) {
   const entradas = movimientos.filter((m) => m.tipo === "ENTRADA");
   const salidas  = movimientos.filter((m) => m.tipo === "SALIDA");
-
   if (movimientos.length === 0 && gastos.length === 0) return null;
 
   return (
-    <div style={{
-      background: "#fff", borderRadius: "14px", padding: "1.25rem",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginTop: "1.5rem",
-    }}>
+    <div style={{ background: "#fff", borderRadius: "14px", padding: "1.25rem", boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginTop: "1.5rem" }}>
       <h3 className={styles.sectionTitle}>Movimientos y Gastos</h3>
-
       {entradas.length > 0 && (
         <>
           <p className={styles.saleTime} style={{ marginBottom: "0.4rem" }}>Entradas</p>
@@ -291,7 +248,6 @@ function MovimientosDetalle({ movimientos, gastos }: {
           </div>
         </>
       )}
-
       {salidas.length > 0 && (
         <>
           <p className={styles.saleTime} style={{ marginTop: "0.75rem", marginBottom: "0.4rem" }}>Salidas</p>
@@ -305,7 +261,6 @@ function MovimientosDetalle({ movimientos, gastos }: {
           </div>
         </>
       )}
-
       {gastos.length > 0 && (
         <>
           <p className={styles.saleTime} style={{ marginTop: "0.75rem", marginBottom: "0.4rem" }}>Gastos</p>
@@ -328,16 +283,9 @@ function MovimientosDetalle({ movimientos, gastos }: {
 // ---------------------------------------------------
 function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
   if (orders.length === 0) return null;
-
   return (
-    <div style={{
-      background: "#fff", borderRadius: "14px", padding: "1.25rem",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginTop: "1.5rem",
-      border: "1px solid #fee2e2",
-    }}>
-      <h3 className={styles.sectionTitle} style={{ color: "#ef4444" }}>
-        Órdenes canceladas ({orders.length})
-      </h3>
+    <div style={{ background: "#fff", borderRadius: "14px", padding: "1.25rem", boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginTop: "1.5rem", border: "1px solid #fee2e2" }}>
+      <h3 className={styles.sectionTitle} style={{ color: "#ef4444" }}>Órdenes canceladas ({orders.length})</h3>
       <div className={styles.saleList}>
         {[...orders]
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -361,12 +309,8 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
                 </div>
               </div>
               <div className={styles.saleRight}>
-                <span style={{ fontSize: "0.7rem", fontWeight: 600, padding: "2px 8px", borderRadius: "999px", background: "#fee2e2", color: "#ef4444", whiteSpace: "nowrap" }}>
-                  CANCELADA
-                </span>
-                <span className={styles.saleTotal} style={{ color: "#ef4444" }}>
-                  {formatCurrency(order.total)}
-                </span>
+                <span style={{ fontSize: "0.7rem", fontWeight: 600, padding: "2px 8px", borderRadius: "999px", background: "#fee2e2", color: "#ef4444", whiteSpace: "nowrap" }}>CANCELADA</span>
+                <span className={styles.saleTotal} style={{ color: "#ef4444" }}>{formatCurrency(order.total)}</span>
               </div>
             </div>
           ))}
@@ -376,31 +320,112 @@ function CancelledOrdersSection({ orders }: { orders: CancelledOrder[] }) {
 }
 
 // ---------------------------------------------------
-// Reports Panel — Semanal / Mensual
+// Top Productos — barras horizontales custom (sin recharts)
+// ---------------------------------------------------
+const CHART_COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#14b8a6"];
+
+function TopProductsChart({ items, totalVentas }: {
+  items: { name: string; qty: number; total: number }[];
+  totalVentas: number;
+}) {
+  if (items.length === 0) return <p className={styles.empty}>Sin datos</p>;
+  const max = Math.max(...items.map((i) => i.total));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+      {items.map((item, idx) => {
+        const pct   = max > 0 ? (item.total / max) * 100 : 0;
+        const share = totalVentas > 0 ? ((item.total / totalVentas) * 100).toFixed(1) : "0";
+        return (
+          <div key={item.name}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
+              <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", maxWidth: "55%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {item.name}
+              </span>
+              <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                {item.qty} uds · {formatCurrency(item.total)} · <strong>{share}%</strong>
+              </span>
+            </div>
+            <div style={{ height: "10px", background: "#f1f5f9", borderRadius: "999px", overflow: "hidden" }}>
+              <div style={{
+                height: "100%", width: `${pct}%`,
+                background: CHART_COLORS[idx % CHART_COLORS.length],
+                borderRadius: "999px",
+                transition: "width 0.6s ease",
+              }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Gráfica de ventas por día de la semana (recharts)
+// ---------------------------------------------------
+const DAY_NAMES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const DAY_COLORS = ["#6366f1", "#6366f1", "#6366f1", "#6366f1", "#22c55e", "#f59e0b", "#ef4444"];
+
+function buildDayOfWeekData(cajas: Caja[]) {
+  const totals = Array(7).fill(0);
+  for (const caja of cajas) {
+    for (const venta of caja.ventas) {
+      const d   = new Date(venta.createdAt);
+      const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      totals[dow] += venta.total;
+    }
+  }
+  return DAY_NAMES.map((name, i) => ({ name, total: totals[i] }));
+}
+
+function DayOfWeekChart({ cajas }: { cajas: Caja[] }) {
+  const data    = buildDayOfWeekData(cajas);
+  const hasData = data.some((d) => d.total > 0);
+  if (!hasData) return <p className={styles.empty}>Sin datos suficientes</p>;
+
+  return (
+    <ResponsiveContainer width="100%" height={220}>
+      <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+        <YAxis
+          tick={{ fontSize: 11, fill: "#94a3b8" }}
+          axisLine={false} tickLine={false}
+          tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+        />
+        <Tooltip
+          formatter={(value: any) => [formatCurrency(Number(value)), "Ventas"]}
+          contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "0.8rem" }}
+        />
+        <Bar dataKey="total" radius={[6, 6, 0, 0]}>
+          {data.map((_, idx) => <Cell key={idx} fill={DAY_COLORS[idx]} />)}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// ---------------------------------------------------
+// Reports Panel
 // ---------------------------------------------------
 type ReportPeriod = "weekly" | "monthly";
 
 function buildPeriods(cajas: Caja[], mode: ReportPeriod) {
-  // Agrupa cajas cerradas por semana ISO o mes
-  const closed = cajas.filter((c) => c.fechaCierre !== null);
-
+  const closed  = cajas.filter((c) => c.fechaCierre !== null);
   const buckets: Record<string, { label: string; cajas: Caja[] }> = {};
 
   for (const caja of closed) {
     const date = new Date(caja.fechaApertura);
-    let key: string;
-    let label: string;
+    let key: string, label: string;
 
     if (mode === "monthly") {
       key   = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       label = date.toLocaleDateString("es-MX", { month: "long", year: "numeric" });
     } else {
-      // Semana ISO (lunes como inicio)
-      const day  = date.getDay() === 0 ? 6 : date.getDay() - 1; // 0=lun
-      const mon  = new Date(date);
-      mon.setDate(date.getDate() - day);
-      const sun  = new Date(mon);
-      sun.setDate(mon.getDate() + 6);
+      const day = date.getDay() === 0 ? 6 : date.getDay() - 1;
+      const mon = new Date(date); mon.setDate(date.getDate() - day);
+      const sun = new Date(mon);  sun.setDate(mon.getDate() + 6);
       key   = mon.toISOString().slice(0, 10);
       label = `${formatDate(mon.toISOString())} – ${formatDate(sun.toISOString())}`;
     }
@@ -409,14 +434,13 @@ function buildPeriods(cajas: Caja[], mode: ReportPeriod) {
     buckets[key].cajas.push(caja);
   }
 
-  // Ordenar de más reciente a más antiguo
   return Object.entries(buckets)
     .sort(([a], [b]) => b.localeCompare(a))
     .map(([key, val]) => ({ key, ...val }));
 }
 
 function calcPeriodStats(cajas: Caja[]) {
-  let totalVentas = 0, efectivo = 0, tarjeta = 0, gastos = 0, ordenes = 0;
+  let totalVentas = 0, efectivo = 0, tarjeta = 0, gastos = 0, ordenes = 0, entradas = 0, salidas = 0;
   const itemMap: Record<string, { name: string; qty: number; total: number }> = {};
 
   for (const caja of cajas) {
@@ -426,6 +450,8 @@ function calcPeriodStats(cajas: Caja[]) {
     tarjeta     += r.tarjeta;
     gastos      += r.gastos;
     ordenes     += r.ordenes;
+    entradas    += r.entradas;
+    salidas     += r.salidas;
 
     for (const item of r.topItems) {
       if (!itemMap[item.name]) itemMap[item.name] = { name: item.name, qty: 0, total: 0 };
@@ -434,45 +460,28 @@ function calcPeriodStats(cajas: Caja[]) {
     }
   }
 
-  const topItems = Object.values(itemMap)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
-
+  const topItems  = Object.values(itemMap).sort((a, b) => b.total - a.total).slice(0, 5);
   const avgTicket = ordenes ? totalVentas / ordenes : 0;
-
-  return { totalVentas, efectivo, tarjeta, gastos, ordenes, avgTicket, topItems };
+  return { totalVentas, efectivo, tarjeta, gastos, ordenes, avgTicket, topItems, entradas, salidas };
 }
 
 function ReportsPanel({ cajas }: { cajas: Caja[] }) {
-  const [mode, setMode] = useState<ReportPeriod>("weekly");
+  const [mode, setMode]             = useState<ReportPeriod>("weekly");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  const periods = buildPeriods(cajas, mode);
+  const periods        = buildPeriods(cajas, mode);
   const selectedPeriod = periods.find((p) => p.key === selectedKey) ?? null;
   const selectedStats  = selectedPeriod ? calcPeriodStats(selectedPeriod.cajas) : null;
-
-  // Comparativa: período actual vs anterior
-  const currentIdx  = periods.findIndex((p) => p.key === selectedKey);
-  const prevPeriod  = currentIdx >= 0 && currentIdx + 1 < periods.length ? periods[currentIdx + 1] : null;
-  const prevStats   = prevPeriod ? calcPeriodStats(prevPeriod.cajas) : null;
-
-  function diffPct(curr: number, prev: number) {
-    if (!prev) return null;
-    const pct = ((curr - prev) / prev) * 100;
-    return pct;
-  }
+  const currentIdx     = periods.findIndex((p) => p.key === selectedKey);
+  const prevPeriod     = currentIdx >= 0 && currentIdx + 1 < periods.length ? periods[currentIdx + 1] : null;
+  const prevStats      = prevPeriod ? calcPeriodStats(prevPeriod.cajas) : null;
 
   function DiffBadge({ curr, prev }: { curr: number; prev: number }) {
-    const pct = diffPct(curr, prev);
-    if (pct === null) return null;
-    const up = pct >= 0;
+    if (!prev) return null;
+    const pct = ((curr - prev) / prev) * 100;
+    const up  = pct >= 0;
     return (
-      <span style={{
-        fontSize: "0.7rem", fontWeight: 700,
-        color: up ? "#16a34a" : "#ef4444",
-        background: up ? "#dcfce7" : "#fee2e2",
-        borderRadius: "999px", padding: "2px 7px", marginLeft: "0.4rem",
-      }}>
+      <span style={{ fontSize: "0.7rem", fontWeight: 700, color: up ? "#16a34a" : "#ef4444", background: up ? "#dcfce7" : "#fee2e2", borderRadius: "999px", padding: "2px 7px", marginLeft: "0.4rem" }}>
         {up ? "▲" : "▼"} {Math.abs(pct).toFixed(1)}%
       </span>
     );
@@ -486,19 +495,15 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
           <p className={styles.panelSub}>{periods.length} períodos registrados</p>
         </div>
         <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${mode === "weekly" ? styles.tabActive : ""}`}
-            onClick={() => { setMode("weekly"); setSelectedKey(null); }}
-          >
-            Semanal
-          </button>
-          <button
-            className={`${styles.tab} ${mode === "monthly" ? styles.tabActive : ""}`}
-            onClick={() => { setMode("monthly"); setSelectedKey(null); }}
-          >
-            Mensual
-          </button>
+          <button className={`${styles.tab} ${mode === "weekly"  ? styles.tabActive : ""}`} onClick={() => { setMode("weekly");  setSelectedKey(null); }}>Semanal</button>
+          <button className={`${styles.tab} ${mode === "monthly" ? styles.tabActive : ""}`} onClick={() => { setMode("monthly"); setSelectedKey(null); }}>Mensual</button>
         </div>
+      </div>
+
+      {/* Gráfica días de la semana — siempre visible */}
+      <div style={{ background: "#fff", borderRadius: "14px", padding: "1.25rem", boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginBottom: "1.5rem" }}>
+        <h3 className={styles.sectionTitle} style={{ marginBottom: "1rem" }}>Ventas por día de la semana</h3>
+        <DayOfWeekChart cajas={cajas.filter((c) => c.fechaCierre !== null)} />
       </div>
 
       <div className={styles.historyGrid}>
@@ -540,7 +545,7 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
                 {selectedPeriod.cajas.length} cajas · {selectedStats.ordenes} órdenes
               </p>
 
-              {/* Stats con comparativa */}
+              {/* Stats con entradas y salidas */}
               <div className={styles.detailStats}>
                 <div className={styles.statCard} style={{ "--accent": "#22c55e" } as any}>
                   <span className={styles.statLabel}>Total ventas</span>
@@ -548,9 +553,7 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
                     {formatCurrency(selectedStats.totalVentas)}
                     {prevStats && <DiffBadge curr={selectedStats.totalVentas} prev={prevStats.totalVentas} />}
                   </span>
-                  {prevStats && (
-                    <span className={styles.statSub}>Período ant.: {formatCurrency(prevStats.totalVentas)}</span>
-                  )}
+                  {prevStats && <span className={styles.statSub}>Período ant.: {formatCurrency(prevStats.totalVentas)}</span>}
                 </div>
                 <div className={styles.statCard} style={{ "--accent": "#f59e0b" } as any}>
                   <span className={styles.statLabel}>Efectivo</span>
@@ -570,6 +573,20 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
                   <span className={styles.statLabel}>Gastos</span>
                   <span className={styles.statValue}>{formatCurrency(selectedStats.gastos)}</span>
                 </div>
+                <div className={styles.statCard} style={{ "--accent": "#16a34a" } as any}>
+                  <span className={styles.statLabel}>Entradas</span>
+                  <span className={styles.statValue}>
+                    +{formatCurrency(selectedStats.entradas)}
+                    {prevStats && <DiffBadge curr={selectedStats.entradas} prev={prevStats.entradas} />}
+                  </span>
+                </div>
+                <div className={styles.statCard} style={{ "--accent": "#dc2626" } as any}>
+                  <span className={styles.statLabel}>Salidas</span>
+                  <span className={styles.statValue}>
+                    -{formatCurrency(selectedStats.salidas)}
+                    {prevStats && <DiffBadge curr={selectedStats.salidas} prev={prevStats.salidas} />}
+                  </span>
+                </div>
                 <div className={styles.statCard} style={{ "--accent": "#3b82f6" } as any}>
                   <span className={styles.statLabel}>Ticket promedio</span>
                   <span className={styles.statValue}>
@@ -579,32 +596,12 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
                 </div>
               </div>
 
-              {/* Top productos */}
+              {/* Gráfica top productos — reemplaza tabla */}
               {selectedStats.topItems.length > 0 && (
-                <>
-                  <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Top productos del período</h4>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
-                    </thead>
-                    <tbody>
-                      {selectedStats.topItems.map((item) => (
-                        <tr key={item.name}>
-                          <td>{item.name}</td>
-                          <td>{item.qty}</td>
-                          <td>{formatCurrency(item.total)}</td>
-                          <td>
-                            <span className={styles.shareBadge}>
-                              {selectedStats.totalVentas > 0
-                                ? ((item.total / selectedStats.totalVentas) * 100).toFixed(1)
-                                : "0"}%
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </>
+                <div style={{ marginTop: "1.5rem" }}>
+                  <h4 className={styles.sectionTitle} style={{ marginBottom: "1rem" }}>Top productos del período</h4>
+                  <TopProductsChart items={selectedStats.topItems} totalVentas={selectedStats.totalVentas} />
+                </div>
               )}
 
               {/* Desglose por caja */}
@@ -658,40 +655,26 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
         <span className={styles.liveBadge}>● EN VIVO</span>
       </div>
 
+      {/* Stats con entradas y salidas */}
       <div className={styles.statsGrid}>
-        <StatCard label="Ventas brutas" value={formatCurrency(r.totalVentas)} sub={`${r.ordenes} órdenes`} accent="#22c55e" />
-        <StatCard label="Ticket promedio" value={formatCurrency(r.avgTicket)} accent="#3b82f6" />
-        <StatCard label="Efectivo" value={formatCurrency(r.efectivo)} accent="#f59e0b" />
-        <StatCard label="Tarjeta" value={formatCurrency(r.tarjeta)} accent="#8b5cf6" />
-        <StatCard label="Gastos" value={formatCurrency(r.gastos)} accent="#ef4444" />
-        <StatCard label="Total en caja" value={formatCurrency(r.totalGeneral)} sub={`Inicial: ${formatCurrency(caja.montoInicial)}`} accent="#14b8a6" />
+        <StatCard label="Ventas brutas"   value={formatCurrency(r.totalVentas)} sub={`${r.ordenes} órdenes`} accent="#22c55e" />
+        <StatCard label="Ticket promedio" value={formatCurrency(r.avgTicket)}   accent="#3b82f6" />
+        <StatCard label="Efectivo"        value={formatCurrency(r.efectivo)}    accent="#f59e0b" />
+        <StatCard label="Tarjeta"         value={formatCurrency(r.tarjeta)}     accent="#8b5cf6" />
+        <StatCard label="Gastos"          value={formatCurrency(r.gastos)}      accent="#ef4444" />
+        <StatCard label="Entradas"        value={`+${formatCurrency(r.entradas)}`} accent="#16a34a" />
+        <StatCard label="Salidas"         value={`-${formatCurrency(r.salidas)}`}  accent="#dc2626" />
+        <StatCard label="Total en caja"   value={formatCurrency(r.totalGeneral)} sub={`Inicial: ${formatCurrency(caja.montoInicial)}`} accent="#14b8a6" />
       </div>
 
       <div className={styles.bottomGrid}>
+        {/* Top productos como gráfica */}
         <div className={styles.topItems}>
           <h3 className={styles.sectionTitle}>Top productos</h3>
           {r.topItems.length === 0 ? (
             <p className={styles.empty}>Sin ventas aún</p>
           ) : (
-            <table className={styles.table}>
-              <thead>
-                <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
-              </thead>
-              <tbody>
-                {r.topItems.map((item) => (
-                  <tr key={item.name}>
-                    <td>{item.name}</td>
-                    <td>{item.qty}</td>
-                    <td>{formatCurrency(item.total)}</td>
-                    <td>
-                      <span className={styles.shareBadge}>
-                        {r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TopProductsChart items={r.topItems} totalVentas={r.totalVentas} />
           )}
         </div>
 
@@ -704,9 +687,7 @@ function TodayPanel({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
               {[...caja.ventas]
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .slice(0, 8)
-                .map((sale) => (
-                  <SaleRow key={sale.id} sale={sale} />
-                ))}
+                .map((sale) => <SaleRow key={sale.id} sale={sale} />)}
             </div>
           )}
         </div>
@@ -764,10 +745,7 @@ function HistoryPanel({ cajas, cancelledByCaja }: {
               <p>Selecciona una caja para ver el detalle</p>
             </div>
           ) : (
-            <CajaDetail
-              caja={selected}
-              cancelledOrders={cancelledByCaja[selected.id] ?? []}
-            />
+            <CajaDetail caja={selected} cancelledOrders={cancelledByCaja[selected.id] ?? []} />
           )}
         </div>
       </div>
@@ -807,7 +785,6 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
             {caja.user ? ` · ${caja.user.name}` : ""}
           </p>
         </div>
-
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
           <button
             onClick={handlePrint}
@@ -834,38 +811,24 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
         </div>
       </div>
 
+      {/* Stats con entradas y salidas */}
       <div className={styles.detailStats}>
-        <StatCard label="Ventas" value={formatCurrency(r.totalVentas)} accent="#22c55e" />
-        <StatCard label="Efectivo" value={formatCurrency(r.efectivo)} accent="#f59e0b" />
-        <StatCard label="Tarjeta" value={formatCurrency(r.tarjeta)} accent="#8b5cf6" />
-        <StatCard label="Gastos" value={formatCurrency(r.gastos)} accent="#ef4444" />
-        <StatCard label="Total final" value={formatCurrency(r.totalGeneral)} accent="#14b8a6" />
-        <StatCard label="Ticket prom." value={formatCurrency(r.avgTicket)} accent="#3b82f6" />
+        <StatCard label="Ventas"       value={formatCurrency(r.totalVentas)}  accent="#22c55e" />
+        <StatCard label="Efectivo"     value={formatCurrency(r.efectivo)}     accent="#f59e0b" />
+        <StatCard label="Tarjeta"      value={formatCurrency(r.tarjeta)}      accent="#8b5cf6" />
+        <StatCard label="Gastos"       value={formatCurrency(r.gastos)}       accent="#ef4444" />
+        <StatCard label="Entradas"     value={`+${formatCurrency(r.entradas)}`} accent="#16a34a" />
+        <StatCard label="Salidas"      value={`-${formatCurrency(r.salidas)}`}  accent="#dc2626" />
+        <StatCard label="Total final"  value={formatCurrency(r.totalGeneral)} accent="#14b8a6" />
+        <StatCard label="Ticket prom." value={formatCurrency(r.avgTicket)}    accent="#3b82f6" />
       </div>
 
+      {/* Gráfica top productos */}
       {r.topItems.length > 0 && (
-        <>
-          <h4 className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Top productos</h4>
-          <table className={styles.table}>
-            <thead>
-              <tr><th>Producto</th><th>Cant.</th><th>Total</th><th>%</th></tr>
-            </thead>
-            <tbody>
-              {r.topItems.map((item) => (
-                <tr key={item.name}>
-                  <td>{item.name}</td>
-                  <td>{item.qty}</td>
-                  <td>{formatCurrency(item.total)}</td>
-                  <td>
-                    <span className={styles.shareBadge}>
-                      {r.totalVentas > 0 ? ((item.total / r.totalVentas) * 100).toFixed(1) : "0"}%
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+        <div style={{ marginTop: "1.5rem" }}>
+          <h4 className={styles.sectionTitle} style={{ marginBottom: "1rem" }}>Top productos</h4>
+          <TopProductsChart items={r.topItems} totalVentas={r.totalVentas} />
+        </div>
       )}
 
       {caja.ventas.length > 0 && (
@@ -874,9 +837,7 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
           <div className={styles.saleList}>
             {[...caja.ventas]
               .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-              .map((sale) => (
-                <SaleRow key={sale.id} sale={sale} />
-              ))}
+              .map((sale) => <SaleRow key={sale.id} sale={sale} />)}
           </div>
         </>
       )}
@@ -891,12 +852,12 @@ function CajaDetail({ caja, cancelledOrders }: { caja: Caja; cancelledOrders: Ca
 // Main Page
 // ---------------------------------------------------
 export default function SalesReportPage() {
-  const [cajaActual, setCajaActual]       = useState<Caja | null>(null);
-  const [historico, setHistorico]         = useState<Caja[]>([]);
-  const [cancelledToday, setCancelledToday]     = useState<CancelledOrder[]>([]);
-  const [cancelledByCaja, setCancelledByCaja]   = useState<Record<number, CancelledOrder[]>>({});
-  const [loading, setLoading]             = useState(true);
-  const [tab, setTab]                     = useState<"today" | "history" | "reports">("today");
+  const [cajaActual, setCajaActual]           = useState<Caja | null>(null);
+  const [historico, setHistorico]             = useState<Caja[]>([]);
+  const [cancelledToday, setCancelledToday]   = useState<CancelledOrder[]>([]);
+  const [cancelledByCaja, setCancelledByCaja] = useState<Record<number, CancelledOrder[]>>({});
+  const [loading, setLoading]                 = useState(true);
+  const [tab, setTab]                         = useState<"today" | "history" | "reports">("today");
 
   const fetchData = async () => {
     try {
@@ -904,34 +865,26 @@ export default function SalesReportPage() {
         apiRequest("/caja/actual").catch(() => null),
         apiRequest("/caja").catch(() => []),
       ]);
-
       setCajaActual(actual);
       setHistorico(all);
 
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-
       const cancelled: CancelledOrder[] = await apiRequest(
-        `/orders?status=CANCELLED&from=${todayStart.toISOString()}&to=${todayEnd.toISOString()}`
+        `/orders?status=CANCELLED&from=${todayStart.toISOString()}&to=${new Date().toISOString()}`
       ).catch(() => []);
-
       setCancelledToday(cancelled);
 
       const closedCajas: Caja[] = (all as Caja[]).filter((c) => c.fechaCierre !== null);
       const cancelledPerCaja: Record<number, CancelledOrder[]> = {};
-
       await Promise.all(
         closedCajas.map(async (caja) => {
-          const from = new Date(caja.fechaApertura).toISOString();
-          const to   = new Date(caja.fechaCierre!).toISOString();
           const orders: CancelledOrder[] = await apiRequest(
-            `/orders?status=CANCELLED&from=${from}&to=${to}`
+            `/orders?status=CANCELLED&from=${new Date(caja.fechaApertura).toISOString()}&to=${new Date(caja.fechaCierre!).toISOString()}`
           ).catch(() => []);
           cancelledPerCaja[caja.id] = orders;
         })
       );
-
       setCancelledByCaja(cancelledPerCaja);
     } finally {
       setLoading(false);
