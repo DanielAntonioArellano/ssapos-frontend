@@ -1,7 +1,7 @@
 // components/PrinterStatus.tsx
 import { useEffect, useState } from "react";
-import { apiRequest } from "../../services/api";
-import { useCaja } from "../../context/CajaContext";
+import { apiRequest } from "../../src/services/api";
+import { useCaja } from "../../src/context/CajaContext";
 
 type Status = "online" | "offline" | "unknown";
 
