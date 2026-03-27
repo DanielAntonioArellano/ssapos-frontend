@@ -6,6 +6,7 @@ import {
   Users, Settings, BookOpenCheck, PackageSearch, X, Printer
 } from "lucide-react";
 import { useRole } from "../hooks/useRole";
+import MeseroPage from "../modules/mesero/meseroPage";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,7 +25,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     : "PO";
 
   const allNavItems = [
-    { label: "Panel Principal", icon: LayoutDashboard, path: "/dashboard", show: true },
+    { label: "Panel Principal", icon: LayoutDashboard, path: "/dashboard", show: can.verCaja },
+    { label: "Panel Mesero",    icon: MeseroPage,      path: "/mesero", show: can.verMesero },
     { label: "Ordenes",         icon: ClipboardList,   path: "/orders",    show: true },
     { label: "Mesas",           icon: ClipboardList,   path: "/tables",    show: true },
     { label: "Productos",       icon: PackageSearch,   path: "/products",  show: can.verProductos },
