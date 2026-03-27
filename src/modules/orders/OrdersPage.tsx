@@ -166,7 +166,7 @@ export default function OrdersPage() {
     const interval = setInterval(() => {
       if (checkoutOrder || cancelOrderId) return;
       fetchOrders();
-    }, 20000);
+    });
     return () => clearInterval(interval);
   }, [checkoutOrder, cancelOrderId]);
 
