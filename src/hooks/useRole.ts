@@ -22,7 +22,7 @@ export function useRole() {
       verProductos:  role === "ADMIN" || role === "CAJERO",
       verInventario: role === "ADMIN",
       verClientes:   role === "ADMIN",
-      VerMesero:     role === "MESERO",
+      verMesero:     role === "MESERO",
     },
   };
 }
