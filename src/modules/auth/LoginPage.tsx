@@ -27,6 +27,8 @@ export default function LoginPage() {
 
       if (loggedUser?.isSuperAdmin) {
         navigate("/superadmin");
+      } else if (loggedUser?.role === "MESERO") {
+        navigate("/mesero");
       } else {
         navigate("/dashboard");
       }
@@ -62,19 +64,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            style={{
-              position: "absolute",
-              right: "0.75rem",
-              top: "50%",
-              transform: "translateY(-50%)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#94a3b8",
-              display: "flex",
-              alignItems: "center",
-              padding: 0,
-            }}
+            style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#94a3b8", display: "flex", alignItems: "center", padding: 0 }}
             tabIndex={-1}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

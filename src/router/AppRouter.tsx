@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../modules/auth/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
+import MeseroRoute from "./MeseroRoute";
 import SuperAdminRoute from "./SuperAdminRoute";
 import DashboardLayout from "../layout/DashboardLayout";
 import PosPage from "../modules/pos/PosPage";
@@ -14,6 +15,7 @@ import ProductsPage from "../modules/products/Productspage";
 import PrintersPage from "../modules/printers/PrintersPage";
 import SuperAdminPage from "../modules/superadmin/SuperAdminPage";
 import CustomersPage from "../modules/users/CustomersPage";
+import MeseroPage from "../modules/mesero/MeseroPage";
 
 export default function AppRouter() {
   return (
@@ -22,7 +24,7 @@ export default function AppRouter() {
       {/* LOGIN */}
       <Route path="/" element={<LoginPage />} />
 
-      {/* SUPERADMIN — layout propio sin CajaProvider */}
+      {/* SUPERADMIN */}
       <Route
         path="/superadmin"
         element={
@@ -32,7 +34,19 @@ export default function AppRouter() {
         }
       />
 
-      {/* PROTECTED AREA */}
+      {/* MESERO — layout propio optimizado para móvil */}
+      <Route
+        path="/mesero"
+        element={
+          <MeseroRoute>
+            <CajaProvider>
+              <MeseroPage />
+            </CajaProvider>
+          </MeseroRoute>
+        }
+      />
+
+      {/* PROTECTED AREA — ADMIN y CAJERO */}
       <Route
         element={
           <ProtectedRoute>
@@ -53,7 +67,6 @@ export default function AppRouter() {
         <Route path="/products/edit/:id" element={<ProductsPage />} />
         <Route path="/printers" element={<PrintersPage />} />
         <Route path="/Customers" element={<CustomersPage />} />
-
       </Route>
 
       {/* Catch-all */}
