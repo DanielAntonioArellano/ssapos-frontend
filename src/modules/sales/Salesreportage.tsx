@@ -462,6 +462,7 @@ function calcPeriodStats(cajas: Caja[]) {
 
   const topItems  = Object.values(itemMap).sort((a, b) => b.total - a.total).slice(0, 5);
   const avgTicket = ordenes ? totalVentas / ordenes : 0;
+  const totalFinal = efectivo + entradas - gastos - salidas;
   return { totalVentas, efectivo, tarjeta, gastos, ordenes, avgTicket, topItems, entradas, salidas };
 }
 
