@@ -26,7 +26,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const allNavItems = [
     { label: "Panel Principal", icon: LayoutDashboard, path: "/dashboard", show: can.verCaja },
-    { label: "Panel Mesero",    icon: MeseroPage,      path: "/mesero", show: can.verMesero },
+    //{ label: "Panel Mesero",    icon: MeseroPage,      path: "/mesero", show: can.verMesero },
     { label: "Ordenes",         icon: ClipboardList,   path: "/orders",    show: true },
     { label: "Mesas",           icon: ClipboardList,   path: "/tables",    show: true },
     { label: "Productos",       icon: PackageSearch,   path: "/products",  show: can.verProductos },
