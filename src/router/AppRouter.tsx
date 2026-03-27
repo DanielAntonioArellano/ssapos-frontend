@@ -15,7 +15,7 @@ import ProductsPage from "../modules/products/Productspage";
 import PrintersPage from "../modules/printers/PrintersPage";
 import SuperAdminPage from "../modules/superadmin/SuperAdminPage";
 import CustomersPage from "../modules/users/CustomersPage";
-import MeseroPage from "../modules/mesero/MeseroPage";
+import MeseroPage from "../modules/mesero/meseroPage";
 
 export default function AppRouter() {
   return (
