@@ -174,12 +174,14 @@ function SaleRow({ sale }: { sale: Sale }) {
   const orderType   = sale.order?.type;
   const isDineIn    = orderType === "DINE_IN";
   const hasClient   = !isDineIn && (clientName || clientPhone || clientNotes);
+  // DINE_IN siempre es expandible para ver sus productos
+  const isExpandable = hasClient || isDineIn;
 
   return (
     <div
       className={styles.saleRow}
-      style={{ alignItems: "flex-start", flexDirection: "column", cursor: hasClient ? "pointer" : "default" }}
-      onClick={() => hasClient && setExpanded((e) => !e)}
+      style={{ alignItems: "flex-start", flexDirection: "column", cursor: isExpandable ? "pointer" : "default" }}
+      onClick={() => isExpandable && setExpanded((e) => !e)}
     >
       <div style={{ display: "flex", width: "100%", alignItems: "flex-start" }}>
         <div className={styles.saleLeft} style={{ flex: 1 }}>
@@ -199,7 +201,7 @@ function SaleRow({ sale }: { sale: Sale }) {
             {sale.payment}
           </span>
           <span className={styles.saleTotal}>{formatCurrency(sale.total)}</span>
-          {hasClient && (
+          {isExpandable && (
             <span style={{ fontSize: "0.65rem", color: "#94a3b8", marginTop: "0.25rem" }}>
               {expanded ? "▲ ocultar" : "▼ ver más"}
             </span>
@@ -207,7 +209,7 @@ function SaleRow({ sale }: { sale: Sale }) {
         </div>
       </div>
 
-      {expanded && hasClient && (
+      {expanded && isExpandable && (
         <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px dashed #e2e8f0", width: "100%", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
           {clientPhone && <span style={{ fontSize: "0.78rem", color: "#475569" }}>📞 {clientPhone}</span>}
           {clientNotes && <span style={{ fontSize: "0.78rem", color: "#475569", fontStyle: "italic" }}>📝 {clientNotes}</span>}
