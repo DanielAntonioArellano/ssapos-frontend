@@ -3,10 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, ClipboardList, Package,
-  Users, Settings, BookOpenCheck, PackageSearch, X, Printer
+  Users, Settings, BookOpenCheck, PackageSearch, X, Printer, UtensilsCrossed
 } from "lucide-react";
 import { useRole } from "../hooks/useRole";
-import MeseroPage from "../modules/mesero/meseroPage";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -25,19 +24,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     : "PO";
 
   const allNavItems = [
-    { label: "Panel Principal", icon: LayoutDashboard, path: "/dashboard", show: can.verCaja },
-    //{ label: "Panel Mesero",    icon: MeseroPage,      path: "/mesero", show: can.verMesero },
-    { label: "Ordenes",         icon: ClipboardList,   path: "/orders",    show: true },
-    { label: "Mesas",           icon: ClipboardList,   path: "/tables",    show: true },
-    { label: "Productos",       icon: PackageSearch,   path: "/products",  show: can.verProductos },
-    { label: "Inventario",      icon: Package,         path: "/inventory", show: can.verInventario },
-    { label: "Reportes",        icon: BookOpenCheck,   path: "/reportes",  show: can.verReportes },
-    { label: "Usuarios",        icon: Users,           path: "/users",     show: can.verUsuarios },
-    { label: "Clientes",        icon: Users,           path: "/Customers", show: can.verClientes },
-    { label: "Impresoras",      icon: Printer,         path: "/printers",  show: can.verUsuarios },
+    { label: "Panel Principal", icon: LayoutDashboard, path: "/dashboard",  show: !can.verMesero },
+    { label: "Mi Panel",        icon: UtensilsCrossed, path: "/mesero",     show: can.verMesero },
+    { label: "Ordenes",         icon: ClipboardList,   path: "/orders",     show: true },
+    { label: "Mesas",           icon: ClipboardList,   path: "/tables",     show: true },
+    { label: "Productos",       icon: PackageSearch,   path: "/products",   show: can.verProductos },
+    { label: "Inventario",      icon: Package,         path: "/inventory",  show: can.verInventario },
+    { label: "Reportes",        icon: BookOpenCheck,   path: "/reportes",   show: can.verReportes },
+    { label: "Usuarios",        icon: Users,           path: "/users",      show: can.verUsuarios },
+    { label: "Clientes",        icon: Users,           path: "/Customers",  show: can.verClientes },
+    { label: "Impresoras",      icon: Printer,         path: "/printers",   show: can.verUsuarios },
   ];
 
-  // SuperAdmin ve todo
   const navItems = allNavItems.filter(item => isSuperAdmin || item.show);
 
   function handleNav(path: string) {
@@ -47,7 +45,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <div className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}>
-      {/* Botón cerrar — solo visible en móvil */}
       <button className={styles.sidebarCloseBtn} onClick={onClose}>
         <X size={18} />
       </button>
