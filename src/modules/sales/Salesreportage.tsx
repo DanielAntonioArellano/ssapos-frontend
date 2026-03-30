@@ -6,6 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
+import { useAuth } from "../../context/AuthContext";
 
 // ---------------------------------------------------
 // Types
@@ -523,6 +524,7 @@ function calcPeriodStats(cajas: Caja[]) {
 
 function ReportsPanel({ cajas }: { cajas: Caja[] }) {
   const [mode, setMode]               = useState<ReportPeriod>("weekly");
+  const { user } = useAuth();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [printing, setPrinting] = useState(false);
   const [printMsg, setPrintMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -544,25 +546,58 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
       </span>
     );
   }
-  async function handlePrintPeriod() {
-    if (!selectedPeriod || !selectedStats) return;
-    setPrinting(true);
-    setPrintMsg(null);
-    try {
-      // Imprime cada caja del período secuencialmente
-      for (const caja of selectedPeriod.cajas) {
-        if (caja.fechaCierre) {
-          await apiRequest(`/tickets/print/corte/${caja.id}`, { method: "POST" });
-        }
-      }
-      setPrintMsg({ text: `${selectedPeriod.cajas.length} corte(s) enviados a impresora`, ok: true });
-    } catch {
-      setPrintMsg({ text: "No se pudo imprimir el resumen", ok: false });
-    } finally {
-      setPrinting(false);
-      setTimeout(() => setPrintMsg(null), 3000);
-    }
+// Reemplaza la función handlePrintPeriod en ReportsPanel
+// También necesita acceso al nombre del restaurante — agregar useAuth
+
+// 1. Importar useAuth al inicio del archivo:
+// import { useAuth } from "../../context/AuthContext";
+
+// 2. Dentro de ReportsPanel agregar:
+// const { user } = useAuth();
+
+// 3. Reemplazar handlePrintPeriod con esto:
+async function handlePrintPeriod() {
+  if (!selectedPeriod || !selectedStats) return;
+  setPrinting(true);
+  setPrintMsg(null);
+  try {
+    const cajasDelPeriodo = selectedPeriod.cajas;
+    const desde = cajasDelPeriodo.length > 0
+      ? new Date(Math.min(...cajasDelPeriodo.map(c => new Date(c.fechaApertura).getTime())))
+      : new Date();
+    const hasta = cajasDelPeriodo.length > 0
+      ? new Date(Math.max(...cajasDelPeriodo.map(c => new Date(c.fechaCierre ?? c.fechaApertura).getTime())))
+      : new Date();
+
+    await apiRequest("/tickets/print/resumen-periodo", {
+      method: "POST",
+      body: JSON.stringify({
+        restaurantName: user?.restaurant?.name ?? "Restaurante",
+        label: selectedPeriod.label,
+        desde: desde.toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" }),
+        hasta: hasta.toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" }),
+        modo: mode === "weekly" ? "SEMANAL" : "MENSUAL",
+        totalVentas: selectedStats.totalVentas,
+        efectivo: selectedStats.efectivo,
+        tarjeta: selectedStats.tarjeta,
+        gastos: selectedStats.gastos,
+        entradas: selectedStats.entradas,
+        salidas: selectedStats.salidas,
+        totalGeneral: selectedStats.totalGeneral,
+        ordenes: selectedStats.ordenes,
+        avgTicket: selectedStats.avgTicket,
+        numCajas: selectedPeriod.cajas.length,
+        topItems: selectedStats.topItems,
+      }),
+    });
+    setPrintMsg({ text: "Resumen enviado a impresora", ok: true });
+  } catch {
+    setPrintMsg({ text: "No se pudo imprimir el resumen", ok: false });
+  } finally {
+    setPrinting(false);
+    setTimeout(() => setPrintMsg(null), 3000);
   }
+}
 
   return (
     <div className={styles.historyPanel}>
