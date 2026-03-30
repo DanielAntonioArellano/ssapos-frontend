@@ -495,7 +495,7 @@ function buildPeriods(cajas: Caja[], mode: ReportPeriod) {
 }
 
 function calcPeriodStats(cajas: Caja[]) {
-  let totalVentas = 0, efectivo = 0, tarjeta = 0, gastos = 0, ordenes = 0, entradas = 0, salidas = 0;
+  let totalVentas = 0, efectivo = 0, tarjeta = 0, gastos = 0, ordenes = 0, entradas = 0, salidas = 0, totalGeneral = 0;
   const itemMap: Record<string, { name: string; qty: number; total: number }> = {};
 
   for (const caja of cajas) {
@@ -507,6 +507,7 @@ function calcPeriodStats(cajas: Caja[]) {
     ordenes     += r.ordenes;
     entradas    += r.entradas;
     salidas     += r.salidas;
+    totalGeneral  += r.totalGeneral;
 
     for (const item of r.topItems) {
       if (!itemMap[item.name]) itemMap[item.name] = { name: item.name, qty: 0, total: 0 };
@@ -517,12 +518,14 @@ function calcPeriodStats(cajas: Caja[]) {
 
   const topItems  = Object.values(itemMap).sort((a, b) => b.total - a.total).slice(0, 5);
   const avgTicket = ordenes ? totalVentas / ordenes : 0;
-  return { totalVentas, efectivo, tarjeta, gastos, ordenes, avgTicket, topItems, entradas, salidas };
+  return { totalVentas, efectivo, tarjeta, gastos, ordenes, avgTicket, topItems, entradas, salidas, totalGeneral };
 }
 
 function ReportsPanel({ cajas }: { cajas: Caja[] }) {
   const [mode, setMode]               = useState<ReportPeriod>("weekly");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [printing, setPrinting] = useState(false);
+  const [printMsg, setPrintMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const periods        = buildPeriods(cajas, mode);
   const selectedPeriod = periods.find((p) => p.key === selectedKey) ?? null;
@@ -540,6 +543,25 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
         {up ? "▲" : "▼"} {Math.abs(pct).toFixed(1)}%
       </span>
     );
+  }
+  async function handlePrintPeriod() {
+    if (!selectedPeriod || !selectedStats) return;
+    setPrinting(true);
+    setPrintMsg(null);
+    try {
+      // Imprime cada caja del período secuencialmente
+      for (const caja of selectedPeriod.cajas) {
+        if (caja.fechaCierre) {
+          await apiRequest(`/tickets/print/corte/${caja.id}`, { method: "POST" });
+        }
+      }
+      setPrintMsg({ text: `${selectedPeriod.cajas.length} corte(s) enviados a impresora`, ok: true });
+    } catch {
+      setPrintMsg({ text: "No se pudo imprimir el resumen", ok: false });
+    } finally {
+      setPrinting(false);
+      setTimeout(() => setPrintMsg(null), 3000);
+    }
   }
 
   return (
@@ -592,10 +614,39 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
             </div>
           ) : (
             <div className={styles.cajaDetail}>
-              <h3 style={{ marginBottom: "0.25rem" }}>{selectedPeriod.label}</h3>
-              <p className={styles.panelSub} style={{ marginBottom: "1rem" }}>
-                {selectedPeriod.cajas.length} cajas · {selectedStats.ordenes} órdenes
-              </p>
+            {/* Header con botón imprimir */}
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
+                <div>
+                  <h3 style={{ margin: 0 }}>{selectedPeriod.label}</h3>
+                  <p className={styles.panelSub} style={{ marginBottom: 0 }}>
+                    {selectedPeriod.cajas.length} cajas · {selectedStats.ordenes} órdenes
+                  </p>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
+                  <button
+                    onClick={handlePrintPeriod}
+                    disabled={printing}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.4rem",
+                      padding: "0.5rem 1rem",
+                      background: printing ? "#e2e8f0" : "#0f172a",
+                      color: printing ? "#94a3b8" : "#fff",
+                      border: "none", borderRadius: "8px",
+                      fontSize: "0.8rem", fontWeight: 600,
+                      cursor: printing ? "not-allowed" : "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Printer size={15} />
+                    {printing ? "Imprimiendo..." : `Imprimir período (${selectedPeriod.cajas.length})`}
+                  </button>
+                  {printMsg && (
+                    <span style={{ fontSize: "0.75rem", color: printMsg.ok ? "#16a34a" : "#ef4444", fontWeight: 500 }}>
+                      {printMsg.ok ? "✓" : "✗"} {printMsg.text}
+                    </span>
+                  )}
+                </div>
+              </div>
 
               <div className={styles.detailStats}>
                 <div className={styles.statCard} style={{ "--accent": "#22c55e" } as any}>
@@ -629,6 +680,15 @@ function ReportsPanel({ cajas }: { cajas: Caja[] }) {
                 <div className={styles.statCard} style={{ "--accent": "#3b82f6" } as any}>
                   <span className={styles.statLabel}>Ticket promedio</span>
                   <span className={styles.statValue}>{formatCurrency(selectedStats.avgTicket)}{prevStats && <DiffBadge curr={selectedStats.avgTicket} prev={prevStats.avgTicket} />}</span>
+                </div>
+                 {/* ← NUEVO: Total final del período */}
+                <div className={styles.statCard} style={{ "--accent": "#14b8a6" } as any}>
+                  <span className={styles.statLabel}>Total final período</span>
+                  <span className={styles.statValue}>
+                    {formatCurrency(selectedStats.totalGeneral)}
+                    {prevStats && <DiffBadge curr={selectedStats.totalGeneral} prev={prevStats.totalGeneral} />}
+                  </span>
+                  {prevStats && <span className={styles.statSub}>Período ant.: {formatCurrency(prevStats.totalGeneral)}</span>}
                 </div>
               </div>
 
