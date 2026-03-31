@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext"; 
 
 // ---------------------------------------------------
 // Types
