@@ -21,17 +21,14 @@ export default function CerrarCajaModal({ onCancel }: Props) {
   const [loading, setLoading] = useState(false);
   const [resumen, setResumen] = useState<any>(null);
 
-  // ── STEP 1: Validar contraseña (sin cerrar aún) ──
   async function handleValidarPassword() {
     if (!password) {
       toast("Ingresa tu contraseña", "warning");
       return;
     }
-    // Solo avanzamos al paso de fondo, el cierre ocurre después
     setStep("fondo");
   }
 
-  // ── STEP 2: Cerrar caja con o sin fondo ──
   async function handleCerrar() {
     try {
       setLoading(true);
@@ -49,8 +46,8 @@ export default function CerrarCajaModal({ onCancel }: Props) {
 
       toast("Caja cerrada exitosamente", "success");
       setResumen(data);
+      setStep("resumen");
 
-      // Impresión automática del corte
       try {
         await apiRequest(`/tickets/print/corte/${data.id}`, { method: "POST" });
       } catch {
@@ -58,7 +55,6 @@ export default function CerrarCajaModal({ onCancel }: Props) {
       }
     } catch (err: any) {
       toast(err.message ?? "Error al cerrar caja", "error");
-      // Volver al paso de contraseña si falla
       setStep("password");
       setPassword("");
     } finally {
@@ -85,10 +81,11 @@ export default function CerrarCajaModal({ onCancel }: Props) {
     });
   }
 
+  // Datos del resumen — fondoFinal viene del campo directo de Caja
   const totalGastos = resumen?.gastos?.reduce((s: number, g: any) => s + g.monto, 0) ?? 0;
-  const entradas = resumen?.movimientos?.filter((m: any) => m.tipo === "ENTRADA").reduce((s: number, m: any) => s + m.monto, 0) ?? 0;
-  const salidas = resumen?.movimientos?.filter((m: any) => m.tipo === "SALIDA" && m.descripcion !== "Fondo para siguiente turno").reduce((s: number, m: any) => s + m.monto, 0) ?? 0;
-  const fondo = resumen?.movimientos?.find((m: any) => m.descripcion === "Fondo para siguiente turno");
+  const entradas    = resumen?.movimientos?.filter((m: any) => m.tipo === "ENTRADA").reduce((s: number, m: any) => s + m.monto, 0) ?? 0;
+  const salidas     = resumen?.movimientos?.filter((m: any) => m.tipo === "SALIDA").reduce((s: number, m: any) => s + m.monto, 0) ?? 0;
+  const fondo       = resumen?.fondoFinal ?? 0;
 
   // ── STEP 1: Contraseña ──
   if (step === "password") {
@@ -159,15 +156,9 @@ export default function CerrarCajaModal({ onCancel }: Props) {
                 autoFocus
               />
             </div>
-
-            <button
-              className={styles.btnDanger}
-              onClick={handleCerrar}
-              disabled={loading}
-            >
+            <button className={styles.btnDanger} onClick={handleCerrar} disabled={loading}>
               {loading ? "Cerrando..." : "Cerrar caja"}
             </button>
-
             <button
               onClick={() => setStep("password")}
               style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 13 }}
@@ -184,7 +175,6 @@ export default function CerrarCajaModal({ onCancel }: Props) {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-
         <div className={styles.header}>
           <div className={styles.headerTop}>
             <div>
@@ -241,11 +231,11 @@ export default function CerrarCajaModal({ onCancel }: Props) {
                 <span>{formatMoney(salidas)}</span>
               </div>
             )}
-            {fondo && (
+            {fondo > 0 && (
               <div className={styles.row}>
                 <span>Fondo siguiente turno</span>
                 <span style={{ color: "#16a34a", fontWeight: 600 }}>
-                  {formatMoney(fondo.monto)}
+                  {formatMoney(fondo)}
                 </span>
               </div>
             )}
