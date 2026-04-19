@@ -2,7 +2,7 @@ import { useState } from "react";
 import { apiRequest } from "../../services/api";
 import styles from "./GastoMovimientoModal.module.css";
 
-type Tab = "GASTO" | "ENTRADA" | "SALIDA";
+type Tab = "GASTO" | "ENTRADA" | "SUELDOS";
 
 interface Props {
   onClose: () => void;
@@ -83,7 +83,7 @@ export default function GastoMovimientoModal({ onClose, onSuccess }: Props) {
   const TAB_CONFIG: Record<Tab, { label: string; color: string }> = {
     GASTO:   { label: "Gasto",   color: "#ef4444" },
     ENTRADA: { label: "Entrada", color: "#22c55e" },
-    SALIDA:  { label: "Salida",  color: "#f59e0b" },
+    SUELDOS:  { label: "Sueldos",  color: "#f59e0b" },
   };
 
   return (
@@ -98,7 +98,7 @@ export default function GastoMovimientoModal({ onClose, onSuccess }: Props) {
 
         {/* Tabs */}
         <div className={styles.tabs}>
-          {(["GASTO", "ENTRADA", "SALIDA"] as Tab[]).map((t) => (
+          {(["GASTO", "ENTRADA", "SUELDOS"] as Tab[]).map((t) => (
             <button
               key={t}
               className={`${styles.tabBtn} ${tab === t ? styles.tabActive : ""}`}
@@ -141,8 +141,8 @@ export default function GastoMovimientoModal({ onClose, onSuccess }: Props) {
             </div>
           )}
 
-          {/* Descripción (ENTRADA / SALIDA) */}
-          {(tab === "ENTRADA" || tab === "SALIDA") && (
+          {/* Descripción (ENTRADA / SUELDOS) */}
+          {(tab === "ENTRADA" || tab === "SUELDOS") && (
             <div className={styles.field}>
               <label className={styles.label}>Descripción (opcional)</label>
               <input
