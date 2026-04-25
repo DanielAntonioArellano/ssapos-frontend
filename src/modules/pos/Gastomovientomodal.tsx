@@ -64,7 +64,7 @@ export default function GastoMovimientoModal({ onClose, onSuccess }: Props) {
         await apiRequest("/caja/movimiento", {
           method: "POST",
           body: JSON.stringify({
-            tipo: tab, // "ENTRADA" | "SALIDA"
+            tipo: tab === "SUELDOS" ? "SALIDA" : tab,
             monto: Number(monto),
             descripcion: descripcion || undefined,
             password,
