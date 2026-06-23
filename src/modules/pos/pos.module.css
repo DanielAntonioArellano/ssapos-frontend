@@ -87,13 +87,17 @@
     margin-right: 8px;
   }
 
-  .card h4 {
-    margin: 0 0 4px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+ .card h4 {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  white-space: normal;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp:2;
+  text-overflow: ellipsis;
+}
 
   .card p {
     margin: 0;
