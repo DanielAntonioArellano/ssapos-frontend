@@ -398,7 +398,7 @@
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #E5E7EB;
-  font-size: 14px;
+      font-size: 14px;
   outline: none;
   background: white;
   cursor: pointer;
@@ -406,4 +406,4 @@
 
 .select:focus {
   border-color: #0f766e;
-}
+} 
