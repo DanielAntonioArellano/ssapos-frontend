@@ -284,8 +284,8 @@
   }
 
   .addProductBtn:hover {
-    background: #E7F5F5;
-    border-color: #0F4C4C;
+    background: #0F4C4C;
+    border-color:  #E7F5F5;
   }
   .categoriesTabs {
     display: flex;
