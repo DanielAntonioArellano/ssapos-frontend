@@ -125,7 +125,7 @@ export default function PosPage() {
 
   // Siempre agrega entrada individual — nunca agrupa
   function addToCart(product: Product) {
-    setCart((prev) => [...prev, { ...product, quantity: 1 }]);
+    setCart((prev) => [...prev, { ...product, quantity: 1, notes: undefined }]);
   }
 
   function addCustomItem() {
@@ -135,7 +135,7 @@ export default function PosPage() {
     }
     setCart((prev) => [
       ...prev,
-      { customName, priceSell: Number(customPrice), quantity: 1 },
+      { customName, priceSell: Number(customPrice), quantity: 1, notes: undefined },
     ]);
     setCustomName("");
     setCustomPrice("");
@@ -418,7 +418,7 @@ export default function PosPage() {
                 {/* Notas del producto */}
                 <input
                   className={styles.itemNotesInput}
-                  placeholder="Notas (ej: sin cebolla)"
+                  placeholder="Notas"
                   value={item.notes ?? ""}
                   onChange={(e) => {
                     const val = e.target.value;
