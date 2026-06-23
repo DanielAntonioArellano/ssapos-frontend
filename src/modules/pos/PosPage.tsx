@@ -23,7 +23,7 @@ interface CartItem {
   priceSell: number;
   categoryId?: number;
   quantity: number;
-  notes: string;
+  notes?: string;
 }
 
 interface Category {
