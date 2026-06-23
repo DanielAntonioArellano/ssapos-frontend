@@ -23,6 +23,7 @@ interface CartItem {
   priceSell: number;
   categoryId?: number;
   quantity: number;
+  notes: string;
 }
 
 interface Category {
@@ -103,6 +104,7 @@ export default function PosPage() {
           priceSell: item.priceUnit,
           categoryId: item.product?.categoryId,
           quantity: 1,
+          notes: item.notes ?? undefined,
         });
       }
     }
@@ -154,6 +156,7 @@ export default function PosPage() {
       return cart.map((item) => ({
         productId: item.id ?? null,
         customName: item.customName ?? null,
+        notes: item.notes ?? null,
         quantity: 1,
         priceUnit: item.priceSell,
       }));
@@ -412,6 +415,18 @@ export default function PosPage() {
                 >
                   ✕
                 </button>
+                {/* Notas del producto */}
+                <input
+                  className={styles.itemNotesInput}
+                  placeholder="Notas (ej: sin cebolla)"
+                  value={item.notes ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCart((prev) =>
+                      prev.map((it, i) => i === index ? { ...it, notes: val } : it)
+                    );
+                  }}
+                />
               </div>
             ))}
           </div>
