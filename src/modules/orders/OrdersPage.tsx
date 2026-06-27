@@ -50,17 +50,17 @@ type CheckoutOrder = {
 // ---------------------------------------------------
 // Helpers
 // ---------------------------------------------------
-function getElapsed(createdAt: string): string {
-  const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000);
-  if (diff < 60) return `${diff}s`;
-  const mins = Math.floor(diff / 60);
-  if (mins < 60) return `${mins}m`;
-  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
-}
+//function getElapsed(createdAt: string): string {
+  //const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000);
+  //if (diff < 60) return `${diff}s`;
+  //const mins = Math.floor(diff / 60);
+  //if (mins < 60) return `${mins}m`;
+  //return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+//}
 
-function isLate(createdAt: string): boolean {
-  return Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000) >= 15;
-}
+//function isLate(createdAt: string): boolean {
+  //return Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000) >= 15;
+//}
 
 // ---------------------------------------------------
 // Cancel Modal
@@ -118,8 +118,8 @@ function CancelOrderModal({ orderId, onClose, onSuccess }: CancelModalProps) {
 // Order Card
 // ---------------------------------------------------
 function OrderCard({ order, can, navigate, onStartPrep, onSendDelivery, onBackOrdered, onCheckout, onCancel, onReprint }: any) {
-  const late = isLate(order.createdAt);
-  const elapsed = getElapsed(order.createdAt);
+  //const late = isLate(order.createdAt);
+  //const elapsed = getElapsed(order.createdAt);
   const itemsPreview = (order.items ?? []).slice(0, 2);
   const extraItems = (order.items ?? []).length - 2;
 
@@ -129,7 +129,7 @@ function OrderCard({ order, can, navigate, onStartPrep, onSendDelivery, onBackOr
       <div className={styles.cardTop}>
         <div className={styles.cardTopLeft}>
           <span className={styles.cardId}>#{order.id}</span>
-          <span className={late ? styles.timerLate : styles.timerOk}>{elapsed}</span>
+          {/*<span className={late ? styles.timerLate : styles.timerOk}>{elapsed}</span>*/}
         </div>
         <span className={order.type === "DINE_IN" ? styles.badgeDine : styles.badgeDelivery}>
           {order.type === "DINE_IN" ? `Mesa ${order.tableNumber ?? "-"}` : "Domicilio"}
