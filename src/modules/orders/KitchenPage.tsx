@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { apiRequest } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
-import styles from "./kitchen.module.css";
+import styles from "./Kitchen.module.css";
 
 // ---------------------------------------------------
 // Types
