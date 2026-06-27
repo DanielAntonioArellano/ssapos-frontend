@@ -16,6 +16,7 @@ import PrintersPage from "../modules/printers/PrintersPage";
 import SuperAdminPage from "../modules/superadmin/SuperAdminPage";
 import CustomersPage from "../modules/users/CustomersPage";
 import MeseroPage from "../modules/mesero/meseroPage";
+import KitchenPage from "../modules/orders/KitchenPage";
 
 export default function AppRouter() {
   return (
@@ -46,6 +47,8 @@ export default function AppRouter() {
         }
       />
 
+     
+
       {/* PROTECTED AREA — ADMIN y CAJERO */}
       <Route
         element={
@@ -60,6 +63,7 @@ export default function AppRouter() {
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/tables" element={<TablesPage />} />
+        <Route path="/cocina" element={<KitchenPage />} />
         <Route path="/reportes" element={<ReportesPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/products" element={<ProductsPage />} />

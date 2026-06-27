@@ -7,10 +7,14 @@ import styles from "./orders.module.css";
 import CheckoutModal from "../pos/CheckOutModal";
 import { useToast } from "../../context/ToastContext";
 
+// ---------------------------------------------------
+// Types
+// ---------------------------------------------------
 type OrderItem = {
   id: number;
   productId?: number;
   customName?: string;
+  notes?: string;
   quantity: number;
   priceUnit: number;
   subtotal: number;
@@ -20,7 +24,12 @@ type OrderItem = {
 type Order = {
   id: number;
   clientName?: string;
+  clientPhone?: string;
+  clientNotes?: string;
   total: number;
+  type: "DELIVERY" | "DINE_IN" | "TAKEAWAY";
+  tableNumber?: number;
+  createdAt: string;
   status: "ORDERED" | "PREPARATION" | "DELIVERY" | "COMPLETED" | "CANCELLED";
   items?: OrderItem[];
 };
@@ -39,7 +48,22 @@ type CheckoutOrder = {
 };
 
 // ---------------------------------------------------
-// Modal de cancelación con concepto + contraseña admin
+// Helpers
+// ---------------------------------------------------
+function getElapsed(createdAt: string): string {
+  const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000);
+  if (diff < 60) return `${diff}s`;
+  const mins = Math.floor(diff / 60);
+  if (mins < 60) return `${mins}m`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+}
+
+function isLate(createdAt: string): boolean {
+  return Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000) >= 15;
+}
+
+// ---------------------------------------------------
+// Cancel Modal
 // ---------------------------------------------------
 interface CancelModalProps {
   orderId: number;
@@ -55,15 +79,8 @@ function CancelOrderModal({ orderId, onClose, onSuccess }: CancelModalProps) {
   const { toast } = useToast();
 
   async function handleCancel() {
-    if (!concepto.trim()) {
-      setError("Ingresa el motivo de cancelación");
-      return;
-    }
-    if (!password.trim()) {
-      setError("Ingresa la contraseña de administrador");
-      return;
-    }
-
+    if (!concepto.trim()) { setError("Ingresa el motivo de cancelación"); return; }
+    if (!password.trim()) { setError("Ingresa la contraseña de administrador"); return; }
     try {
       setLoading(true);
       setError(null);
@@ -84,47 +101,154 @@ function CancelOrderModal({ orderId, onClose, onSuccess }: CancelModalProps) {
     <div className={styles.modalOverlay}>
       <div className={styles.modalBox}>
         <h3 className={styles.modalTitle}>Cancelar Orden #{orderId}</h3>
-        <p className={styles.modalSubtitle}>
-          Ingresa el motivo y la contraseña de un administrador para confirmar.
-        </p>
-
+        <p className={styles.modalSubtitle}>Ingresa el motivo y la contraseña de un administrador.</p>
         {error && <div className={styles.errorMsg}>{error}</div>}
-
-        <input
-          className={styles.modalInput}
-          type="text"
-          placeholder="Motivo de cancelación"
-          value={concepto}
-          onChange={(e) => setConcepto(e.target.value)}
-          autoFocus
-        />
-
-        <input
-          className={styles.modalInput}
-          type="password"
-          placeholder="Contraseña de administrador"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCancel()}
-          style={{ marginTop: "0.75rem" }}
-        />
-
+        <input className={styles.modalInput} type="text" placeholder="Motivo de cancelación" value={concepto} onChange={(e) => setConcepto(e.target.value)} autoFocus />
+        <input className={styles.modalInput} type="password" placeholder="Contraseña de administrador" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCancel()} style={{ marginTop: "0.75rem" }} />
         <div className={styles.modalActions}>
-          <button
-            className={styles.secondaryBtn}
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cerrar
-          </button>
-          <button
-            className={styles.deleteBtn}
-            onClick={handleCancel}
-            disabled={loading}
-          >
-            {loading ? "Cancelando..." : "Confirmar cancelación"}
-          </button>
+          <button className={styles.secondaryBtn} onClick={onClose} disabled={loading}>Cerrar</button>
+          <button className={styles.deleteBtn} onClick={handleCancel} disabled={loading}>{loading ? "Cancelando..." : "Confirmar cancelación"}</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Order Card
+// ---------------------------------------------------
+function OrderCard({ order, can, navigate, onStartPrep, onSendDelivery, onBackOrdered, onCheckout, onCancel, onReprint }: any) {
+  const late = isLate(order.createdAt);
+  const elapsed = getElapsed(order.createdAt);
+  const itemsPreview = (order.items ?? []).slice(0, 2);
+  const extraItems = (order.items ?? []).length - 2;
+
+  return (
+    <div className={styles.card}>
+      {/* Card Top */}
+      <div className={styles.cardTop}>
+        <div className={styles.cardTopLeft}>
+          <span className={styles.cardId}>#{order.id}</span>
+          <span className={late ? styles.timerLate : styles.timerOk}>{elapsed}</span>
+        </div>
+        <span className={order.type === "DINE_IN" ? styles.badgeDine : styles.badgeDelivery}>
+          {order.type === "DINE_IN" ? `Mesa ${order.tableNumber ?? "-"}` : "Domicilio"}
+        </span>
+      </div>
+
+      {/* Client */}
+      <div className={styles.cardClient}>
+        {order.clientName ?? order.clientPhone ?? "Sin cliente"}
+      </div>
+
+      {/* Items preview */}
+      <div className={styles.cardItems}>
+        {itemsPreview.map((item: OrderItem, i: number) => (
+          <div key={i} className={styles.cardItemRow}>
+            <span className={styles.cardItemQty}>{item.quantity}×</span>
+            <span className={styles.cardItemName}>
+              {item.product?.name ?? item.customName ?? "Producto"}
+            </span>
+          </div>
+        ))}
+        {extraItems > 0 && (
+          <div className={styles.cardItemMore}>+{extraItems} más</div>
+        )}
+        {/* Notas del cliente */}
+        {order.clientNotes && (
+          <div className={styles.cardNote}>📝 {order.clientNotes}</div>
+        )}
+      </div>
+
+      {/* Total */}
+      <div className={styles.cardTotal}>${order.total.toFixed(2)}</div>
+
+      {/* Actions */}
+      <div className={styles.cardActions}>
+        {order.status === "ORDERED" && (
+          <>
+            {can.verProductos && (
+              <button className={styles.btnEdit} onClick={() => navigate(`/dashboard?orderId=${order.id}`)}>✎</button>
+            )}
+            {can.changeStatus && (
+              <button className={styles.btnPrimary} onClick={() => onStartPrep(order.id)}>Preparar</button>
+            )}
+            {onReprint && (
+              <button className={styles.btnIcon} onClick={() => onReprint(order.id)}>🖨</button>
+            )}
+            {onCancel && (
+              <button className={styles.btnDanger} onClick={() => onCancel(order.id)}>✕</button>
+            )}
+          </>
+        )}
+
+        {order.status === "PREPARATION" && (
+          <>
+            {can.changeStatus && (
+              <>
+                <button className={styles.btnSecondary} onClick={() => onBackOrdered(order.id)}>← Volver</button>
+                <button className={styles.btnPrimary} onClick={() => onSendDelivery(order.id)}>Enviar</button>
+              </>
+            )}
+            {onCancel && (
+              <button className={styles.btnDanger} onClick={() => onCancel(order.id)}>✕</button>
+            )}
+          </>
+        )}
+
+        {order.status === "DELIVERY" && (
+          <>
+            {can.checkout && (
+              <button className={styles.btnPrimary} onClick={() => onCheckout(order)}>Cobrar</button>
+            )}
+            {onReprint && (
+              <button className={styles.btnIcon} onClick={() => onReprint(order.id)}>🖨</button>
+            )}
+            {onCancel && (
+              <button className={styles.btnDanger} onClick={() => onCancel(order.id)}>✕</button>
+            )}
+          </>
+        )}
+
+        {order.status === "COMPLETED" && onReprint && (
+          <button className={styles.btnSecondary} onClick={() => onReprint(order.id)}>🖨 Reimprimir</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------
+// Order Column
+// ---------------------------------------------------
+function OrderColumn({ title, orders, statusColor, can, navigate, onStartPrep, onSendDelivery, onBackOrdered, onCheckout, onCancel, onReprint }: any) {
+  return (
+    <div className={styles.column}>
+      <div className={styles.columnHeader}>
+        <div className={styles.columnTitleRow}>
+          <span className={styles.columnDot} style={{ background: statusColor }} />
+          <span className={styles.columnTitle}>{title}</span>
+        </div>
+        <span className={styles.columnCount}>{orders.length}</span>
+      </div>
+      <div className={styles.cards}>
+        {orders.length === 0 && (
+          <div className={styles.emptyCol}>Sin órdenes</div>
+        )}
+        {orders.map((order: Order) => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            can={can}
+            navigate={navigate}
+            onStartPrep={onStartPrep}
+            onSendDelivery={onSendDelivery}
+            onBackOrdered={onBackOrdered}
+            onCheckout={onCheckout}
+            onCancel={onCancel}
+            onReprint={onReprint}
+          />
+        ))}
       </div>
     </div>
   );
@@ -166,7 +290,7 @@ export default function OrdersPage() {
     const interval = setInterval(() => {
       if (checkoutOrder || cancelOrderId) return;
       fetchOrders();
-    },40000);
+    }, 40000);
     return () => clearInterval(interval);
   }, [checkoutOrder, cancelOrderId]);
 
@@ -183,7 +307,7 @@ export default function OrdersPage() {
   };
 
   const openCheckout = (order: Order) => {
-    const mapped: CheckoutOrder = {
+    setCheckoutOrder({
       id: order.id,
       total: order.total,
       items: (order.items ?? []).map(item => ({
@@ -192,17 +316,22 @@ export default function OrdersPage() {
         quantity: item.quantity,
         priceSell: item.priceUnit,
       })),
-    };
-    setCheckoutOrder(mapped);
+    });
+  };
+
+  const handleReprint = async (id: number) => {
+    try {
+      await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
+      toast("Ticket reenviado a impresora", "success");
+    } catch (err: any) {
+      toast(err.message ?? "Error al reimprimir", "error");
+    }
   };
 
   const filtered = search.trim()
     ? orders.filter(o => {
         const q = search.toLowerCase();
-        return (
-          o.clientName?.toLowerCase().includes(q) ||
-          String(o.id).includes(q)
-        );
+        return o.clientName?.toLowerCase().includes(q) || String(o.id).includes(q);
       })
     : orders;
 
@@ -211,90 +340,65 @@ export default function OrdersPage() {
   const delivery    = filtered.filter(o => o.status === "DELIVERY");
   const completed   = filtered.filter(o => o.status === "COMPLETED");
 
-  if (loading) return <div className={styles.container}>Cargando...</div>;
-  if (error)   return <div className={styles.container}>{error}</div>;
+  if (loading) return <div className={styles.container}><p className={styles.loadingText}>Cargando órdenes...</p></div>;
+  if (error)   return <div className={styles.container}><p className={styles.errorText}>{error}</p></div>;
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Orders</h2>
-
-      <div className={styles.content}>
-        <div className={styles.filters}>
-          <h3>Filtros</h3>
-          <input
-            placeholder="Buscar por cliente o #orden..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          {search && (
-            <button className={styles.clearBtn} onClick={() => setSearch("")}>
-              Limpiar
-            </button>
-          )}
-          {search && (
-            <p className={styles.filterResult}>
-              {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
-            </p>
-          )}
+      {/* Header */}
+      <div className={styles.header}>
+        <div>
+          <h1 className={styles.title}>Órdenes</h1>
+          <p className={styles.subtitle}>{orders.length} orden{orders.length !== 1 ? "es" : ""} activa{orders.length !== 1 ? "s" : ""}</p>
         </div>
+        <input
+          className={styles.searchInput}
+          placeholder="Buscar por cliente o #orden..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
 
-        <div className={styles.board}>
-          <OrderColumn
-            title="Ordered"
-            orders={ordered}
-            can={can}
-            navigate={navigate}
-            onStartPrep={(id: number) => changeStatus(id, "PREPARATION")}
-            onCancel={(id: number) => setCancelOrderId(id)}
-            onReprint={async (id: number) => {
-              try {
-                await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
-                toast("Ticket reenviado a impresora", "success");
-              } catch (err: any) {
-                toast(err.message ?? "Error al reimprimir", "error");
-              }
-            }}
-          />
-          <OrderColumn
-            title="Preparation"
-            orders={preparation}
-            can={can}
-            navigate={navigate}
-            onSendDelivery={(id: number) => changeStatus(id, "DELIVERY")}
-            onBackOrdered={(id: number) => changeStatus(id, "ORDERED")}
-            onCancel={(id: number) => setCancelOrderId(id)}
-          />
-          <OrderColumn
-            title="Delivery"
-            orders={delivery}
-            can={can}
-            navigate={navigate}
-            onCheckout={openCheckout}
-            onCancel={(id: number) => setCancelOrderId(id)}
-            onReprint={async (id: number) => {
-              try {
-                await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
-                toast("Ticket reenviado a impresora", "success");
-              } catch (err: any) {
-                toast(err.message ?? "Error al reimprimir", "error");
-              }
-            }}
-          />
-          <OrderColumn
-            title="Completed"
-            orders={completed}
-            can={can}
-            navigate={navigate}
-            onReprint={async (id: number) => {
-              try {
-                await apiRequest(`/tickets/print/order/${id}`, { method: "POST" });
-                toast("Ticket reenviado a impresora", "success");
-              } catch (err: any) {
-                toast(err.message ?? "Error al reimprimir", "error");
-              }
-            }}
-          />
-        </div>
+      {/* Board */}
+      <div className={styles.board}>
+        <OrderColumn
+          title="Ordenado"
+          statusColor="#F59E0B"
+          orders={ordered}
+          can={can}
+          navigate={navigate}
+          onStartPrep={(id: number) => changeStatus(id, "PREPARATION")}
+          onCancel={(id: number) => setCancelOrderId(id)}
+          onReprint={handleReprint}
+        />
+        <OrderColumn
+          title="Preparación"
+          statusColor="#3B82F6"
+          orders={preparation}
+          can={can}
+          navigate={navigate}
+          onSendDelivery={(id: number) => changeStatus(id, "DELIVERY")}
+          onBackOrdered={(id: number) => changeStatus(id, "ORDERED")}
+          onCancel={(id: number) => setCancelOrderId(id)}
+        />
+        <OrderColumn
+          title="Delivery"
+          statusColor="#8B5CF6"
+          orders={delivery}
+          can={can}
+          navigate={navigate}
+          onCheckout={openCheckout}
+          onCancel={(id: number) => setCancelOrderId(id)}
+          onReprint={handleReprint}
+        />
+        <OrderColumn
+          title="Completado"
+          statusColor="#22C55E"
+          orders={completed}
+          can={can}
+          navigate={navigate}
+          onReprint={handleReprint}
+        />
       </div>
 
       {checkoutOrder && (
@@ -303,10 +407,7 @@ export default function OrdersPage() {
           cart={checkoutOrder.items}
           total={checkoutOrder.total}
           onClose={() => setCheckoutOrder(null)}
-          onSuccess={() => {
-            setCheckoutOrder(null);
-            fetchOrders();
-          }}
+          onSuccess={() => { setCheckoutOrder(null); fetchOrders(); }}
         />
       )}
 
@@ -314,155 +415,9 @@ export default function OrdersPage() {
         <CancelOrderModal
           orderId={cancelOrderId}
           onClose={() => setCancelOrderId(null)}
-          onSuccess={() => {
-            setCancelOrderId(null);
-            fetchOrders();
-          }}
+          onSuccess={() => { setCancelOrderId(null); fetchOrders(); }}
         />
       )}
-    </div>
-  );
-}
-
-function OrderColumn({
-  title,
-  orders,
-  can,
-  navigate,
-  onStartPrep,
-  onSendDelivery,
-  onBackOrdered,
-  onCheckout,
-  onCancel,
-  onReprint,
-}: any) {
-  return (
-    <div className={styles.column}>
-      <div className={styles.columnHeader}>
-        <h3>{title}</h3>
-        <span>{orders.length}</span>
-      </div>
-      <div className={styles.cards}>
-        {orders.map((order: Order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            can={can}
-            navigate={navigate}
-            onStartPrep={onStartPrep}
-            onSendDelivery={onSendDelivery}
-            onBackOrdered={onBackOrdered}
-            onCheckout={onCheckout}
-            onCancel={onCancel}
-            onReprint={onReprint}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function OrderCard({
-  order,
-  can,
-  navigate,
-  onStartPrep,
-  onSendDelivery,
-  onBackOrdered,
-  onCheckout,
-  onCancel,
-  onReprint,
-}: any) {
-  return (
-    <div className={styles.card}>
-      <div className={styles.cardHeader}>
-        <strong>Ordenes #{order.id}</strong>
-      </div>
-      <div className={styles.cardBody}>
-        <p>{order.clientName ?? "Sin cliente"}</p>
-        <p>${order.total.toFixed(2)}</p>
-      </div>
-      <div className={styles.cardActions}>
-
-        {order.status === "ORDERED" && (
-          <>
-            {can.verProductos && (
-              <button
-                className={styles.editBtn}
-                onClick={() => navigate(`/dashboard?orderId=${order.id}`)}
-              >
-                Edit
-              </button>
-            )}
-            {can.changeStatus && (
-              <button
-                className={styles.primaryBtn}
-                onClick={() => onStartPrep(order.id)}
-              >
-                Iniciar preparación
-              </button>
-            )}
-          </>
-        )}
-
-        {order.status === "PREPARATION" && (
-          <>
-            {can.changeStatus && (
-              <button
-                className={styles.primaryBtn}
-                onClick={() => onSendDelivery(order.id)}
-              >
-                Cambiar a Enviado
-              </button>
-            )}
-            {can.changeStatus && (
-              <button
-                className={styles.secondaryBtn}
-                onClick={() => onBackOrdered(order.id)}
-              >
-                Volver a Ordenado
-              </button>
-            )}
-          </>
-        )}
-
-        {order.status === "DELIVERY" && can.checkout && (
-          <button
-            className={styles.primaryBtn}
-            onClick={() => onCheckout(order)}
-          >
-            Cobrar
-          </button>
-        )}
-
-        {order.status === "COMPLETED" && onReprint && (
-          <button
-            className={styles.secondaryBtn}
-            onClick={() => onReprint(order.id)}
-          >
-            🖨 Reimprimir
-          </button>
-        )}
-
-        {(order.status === "ORDERED" || order.status === "DELIVERY") && onReprint && (
-          <button
-            className={styles.secondaryBtn}
-            onClick={() => onReprint(order.id)}
-          >
-            🖨 Reimprimir
-          </button>
-        )}
-
-        {order.status !== "COMPLETED" && onCancel && (
-          <button
-            className={styles.deleteBtn}
-            onClick={() => onCancel(order.id)}
-          >
-            Cancelar
-          </button>
-        )}
-
-      </div>
     </div>
   );
 }

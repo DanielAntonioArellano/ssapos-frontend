@@ -28,6 +28,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { label: "Mi Panel",        icon: UtensilsCrossed, path: "/mesero",     show: can.verMesero },
     { label: "Ordenes",         icon: ClipboardList,   path: "/orders",     show: true },
     { label: "Mesas",           icon: ClipboardList,   path: "/tables",     show: true },
+    { label: "Cocina",          icon: UtensilsCrossed, path: "/cocina",     show: true },
     { label: "Productos",       icon: PackageSearch,   path: "/products",   show: can.verProductos },
     { label: "Inventario",      icon: Package,         path: "/inventory",  show: can.verInventario },
     { label: "Reportes",        icon: BookOpenCheck,   path: "/reportes",   show: can.verReportes },
