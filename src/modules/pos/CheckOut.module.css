@@ -1,0 +1,642 @@
+/* ===================================================
+   checkout.module.css
+   =================================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+/* ---------------------------------------------------
+   Modal normal
+   --------------------------------------------------- */
+.modal {
+  background: #fff;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 18px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.14);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal dividido */
+.splitModal {
+  background: #fff;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  border-radius: 18px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.14);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.splitModal::-webkit-scrollbar { width: 4px; }
+.splitModal::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+/* ---------------------------------------------------
+   Header
+   --------------------------------------------------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.splitTrigger {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.splitTrigger:hover { background: #f1f5f9; }
+
+.backBtn {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.backBtn:hover { background: #f1f5f9; }
+
+/* ---------------------------------------------------
+   Items
+   --------------------------------------------------- */
+.itemsSection {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.itemName {
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.itemQty {
+  color: #94a3b8;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.itemPrice {
+  color: #475569;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------
+   Totales
+   --------------------------------------------------- */
+.totalsSection {
+  padding: 12px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.totalLabel { color: #94a3b8; }
+.totalValue { color: #0f172a; font-weight: 500; }
+
+.grandTotalRow {
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 2px;
+}
+
+.grandTotal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.discountLink {
+  font-size: 12px;
+  color: #3b82f6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.discountAmount {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.discountInput {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.discountInput:focus { border-color: #0f172a; }
+
+/* ---------------------------------------------------
+   Método de pago
+   --------------------------------------------------- */
+.paymentSection {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.paymentOptions {
+  display: flex;
+  gap: 8px;
+}
+
+.payOption {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.payOption:hover { background: #f1f5f9; }
+
+.payOptionActive {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #fff;
+}
+
+/* ---------------------------------------------------
+   Efectivo
+   --------------------------------------------------- */
+.cashSection {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.fieldInput {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 9px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.fieldInput:focus { border-color: #0f172a; }
+
+.changeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.changeLabel { color: #16a34a; font-weight: 500; }
+.changeValue { font-weight: 700; color: #16a34a; }
+
+/* ---------------------------------------------------
+   Propina
+   --------------------------------------------------- */
+.tipSection {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tipOptions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tipBtn {
+  flex: 1;
+  padding: 7px 8px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tipBtn:hover { background: #f1f5f9; }
+
+.tipBtnActive {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #fff;
+}
+
+.tipAmount {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: #16a34a;
+  padding: 6px 0;
+}
+
+/* ---------------------------------------------------
+   Footer
+   --------------------------------------------------- */
+.footer {
+  padding: 14px 20px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancelBtn:hover { background: #f1f5f9; }
+.cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.confirmBtn {
+  flex: 2;
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  background: #0f172a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.confirmBtn:hover { background: #1e293b; }
+.confirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------------------------------------------------
+   Modo dividido — Asignación
+   --------------------------------------------------- */
+.assignSection {
+  padding: 14px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.assignRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.assignInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assignName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.assignSub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.assignInputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.assignInputGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.assignLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.assignInput {
+  width: 50px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+}
+
+.assignInput:focus { border-color: #0f172a; }
+
+.progressRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.progressLabel { }
+.progressCount { font-weight: 600; }
+
+.progressBar {
+  height: 3px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* ---------------------------------------------------
+   Modo dividido — Cuentas
+   --------------------------------------------------- */
+.cuentasSection {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cuentaCard {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cuentaHeader {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cuentaTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cuentaActions {
+  display: flex;
+  gap: 6px;
+}
+
+.printBtn {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 7px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.printBtn:hover { background: #f1f5f9; }
+.printBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.removeBtn {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 7px;
+  border: none;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.cuentaBody {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.emptyItems {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.cuentaItem {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #475569;
+}
+
+.payToggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.payPill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.payPillActive {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+}
+
+.tipRow {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.tipPill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tipPillActive {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+}
+
+.receivedRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.receivedLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  min-width: 55px;
+}
+
+.receivedInput {
+  width: 90px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 13px;
+  outline: none;
+}
+
+.receivedInput:focus { border-color: #0f172a; }
+
+.cambio {
+  font-size: 12px;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.cuentaTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+}
+
+.addCuentaBtn {
+  width: 100%;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1.5px dashed #cbd5e1;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.addCuentaBtn:hover {
+  border-color: #94a3b8;
+  color: #64748b;
+}
