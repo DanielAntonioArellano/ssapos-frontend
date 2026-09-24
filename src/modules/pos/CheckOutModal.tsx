@@ -2,7 +2,7 @@ import { useState } from "react";
 import { apiRequest } from "../../services/api";
 import { useCaja } from "../../context/CajaContext";
 import { useToast } from "../../context/ToastContext";
-import styles from "./checkout.module.css";
+import styles from "./CheckOut.module.css";
 
 interface CartItem {
   id?: number;
